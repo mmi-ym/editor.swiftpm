@@ -23,18 +23,21 @@ class DataManager: ObservableObject {
     private let thoughtsFileName = "thoughts.json"
     private let countersFileName = "id_counters.json"
     
+    // MARK: - 初期化完了フラグ
+    @Published var isInitialized = false
+    
     // MARK: - Singleton
     static let shared = DataManager()
     
     private init() {
-        // 初期化を遅延実行
-        DispatchQueue.main.async { [weak self] in
-            self?.loadAllData()
-        }
+        // 空の状態で初期化完了
+        // データロードは明示的に呼び出す
     }
     
-    // MARK: - Load Data
-    func loadAllData() {
+    // MARK: - Initialize
+    func initialize() {
+        guard !isInitialized else { return }
+        
         loadCounters()
         genres = load(fileName: genresFileName) ?? []
         novels = load(fileName: novelsFileName) ?? []
@@ -46,6 +49,13 @@ class DataManager: ObservableObject {
         if genres.isEmpty {
             createSampleData()
         }
+        
+        isInitialized = true
+    }
+    
+    // MARK: - Load Data
+    func loadAllData() {
+        initialize()
     }
     
     // MARK: - Save Data

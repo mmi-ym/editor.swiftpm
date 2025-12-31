@@ -11,7 +11,9 @@ struct GenreListView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                if dataManager.genres.isEmpty {
+                if !dataManager.isInitialized {
+                    ProgressView("読み込み中...")
+                } else if dataManager.genres.isEmpty {
                     emptyStateView
                 } else {
                     genreListView
@@ -62,6 +64,9 @@ struct GenreListView: View {
                         Text("「\(genre.name)」を削除します。この操作は取り消せません。")
                     }
                 }
+            }
+            .onAppear {
+                dataManager.initialize()
             }
         }
     }
