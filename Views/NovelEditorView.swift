@@ -99,17 +99,9 @@ struct NovelEditorView: View {
             .onChange(of: bodyText) { newValue in
                 saveNovel(newValue)
             }
-        }
-    }
-        }
-        .sheet(isPresented: $showingImageConversion) {
-            ImageConversionPlaceholderView()
-        }
-        .onChange(of: bodyText) { oldValue, newValue in
-            saveNovel()
-        }
-        .onDisappear {
-            saveNovel()
+            .onDisappear {
+                saveNovel(bodyText)
+            }
         }
     }
     
@@ -122,39 +114,12 @@ struct NovelEditorView: View {
     }
     
     // MARK: - Save Novel
-    private func saveNovel() {
+    private func saveNovel(_ text: String) {
         var updatedNovel = novel
-        updatedNovel.body = bodyText
+        updatedNovel.body = text
         updatedNovel.updateBodyCount()
         dataManager.updateNovel(updatedNovel)
         novel = updatedNovel
-    }
-}
-
-// MARK: - Vertical Text Editor
-struct VerticalTextEditor: View {
-    @Binding var text: String
-    
-    var body: some View {
-        GeometryReader { geometry in
-            // 縦書きテキストエディタ
-            ScrollView(.horizontal, showsIndicators: true) {
-                TextEditor(text: $text)
-                    .font(.custom("HiraMinProN-W3", size: 20))
-                    .frame(
-                        width: geometry.size.height - 40,
-                        height: geometry.size.width - 40
-                    )
-                    .rotationEffect(.degrees(-90))
-                    .offset(
-                        x: -(geometry.size.height - geometry.size.width) / 2,
-                        y: (geometry.size.height - geometry.size.width) / 2
-                    )
-                    .scrollContentBackground(.hidden)
-                    .background(Color(UIColor.systemBackground))
-            }
-            .rotationEffect(.degrees(90))
-        }
     }
 }
 
