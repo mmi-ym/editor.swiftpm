@@ -57,6 +57,8 @@ struct VerticalTextEditor: UIViewRepresentable {
         textView.backgroundColor = UIColor(red: 0.992, green: 0.984, blue: 0.969, alpha: 1.0)
         textView.textColor = .black
         textView.isScrollEnabled = true
+        textView.isEditable = true
+        textView.isSelectable = true
         
         // 縦書き設定（+90度回転 = 時計回り）
         textView.transform = CGAffineTransform(rotationAngle: .pi / 2)
@@ -141,14 +143,19 @@ struct VerticalTextEditor: UIViewRepresentable {
             // プログラムからの更新中は無視
             guard !isUpdating else { return }
             
-            // attributedTextから文字列を取得
-            parent.text = textView.attributedText?.string ?? ""
+            // textStorageから文字列を取得
+            parent.text = textView.textStorage.string
             
             // カーソル位置が見えるようにスクロール
             if let selectedRange = textView.selectedTextRange {
                 let cursorRect = textView.caretRect(for: selectedRange.start)
                 textView.scrollRectToVisible(cursorRect, animated: true)
             }
+        }
+        
+        // テキスト変更が許可されるか
+        func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+            return true
         }
     }
 }
