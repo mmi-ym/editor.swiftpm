@@ -11,10 +11,15 @@ struct VerticalTextEditor: UIViewRepresentable {
         textView.font = UIFont(name: "HiraMinProN-W3", size: 20) ?? UIFont.systemFont(ofSize: 20)
         textView.backgroundColor = UIColor(red: 0.992, green: 0.984, blue: 0.969, alpha: 1.0)
         textView.textColor = .black
+        textView.textAlignment = .left
         
-        // 縦書き設定
-        textView.transform = CGAffineTransform(rotationAngle: .pi / 2)
+        // 縦書き設定（-90度回転）
+        textView.transform = CGAffineTransform(rotationAngle: -.pi / 2)
         textView.isScrollEnabled = true
+        
+        // スクロール方向を反転
+        textView.contentInset = .zero
+        textView.textContainerInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         
         return textView
     }
