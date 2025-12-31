@@ -23,7 +23,7 @@ struct NovelListView: View {
         }
         .navigationTitle("\(genre.name) 作品一覧")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
+        .toolbar(content: {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     showingAddSheet = true
@@ -213,7 +213,7 @@ struct AddNovelSheet: View {
             }
             .navigationTitle("作品追加")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
@@ -275,7 +275,7 @@ struct EditNovelSheet: View {
             }
             .navigationTitle("作品編集")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false

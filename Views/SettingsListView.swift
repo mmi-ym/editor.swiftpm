@@ -24,7 +24,7 @@ struct SettingsListView: View {
             }
             .navigationTitle("設定")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
                         dismiss()
@@ -193,7 +193,7 @@ struct AddSettingsSheet: View {
             }
             .navigationTitle("設定追加")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
@@ -304,7 +304,7 @@ struct SettingsEditorView: View {
         }
         .navigationTitle(settings.displayTitle)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
+        .toolbar(content: {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
                     dismiss()
@@ -399,7 +399,7 @@ struct EditSettingsTitleSheet: View {
             }
             .navigationTitle("設定編集")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false

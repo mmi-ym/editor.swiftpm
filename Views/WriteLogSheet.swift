@@ -66,7 +66,7 @@ struct AddWriteLogSheet: View {
             }
             .navigationTitle("執筆記録追加")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
@@ -196,7 +196,7 @@ struct EditWriteLogSheet: View {
             }
             .navigationTitle("執筆記録編集")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false

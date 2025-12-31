@@ -20,7 +20,7 @@ struct GenreListView: View {
                 }
             }
             .navigationTitle("ジャンル一覧")
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
                         // TODO: 執筆記録画面への遷移
@@ -219,7 +219,7 @@ struct AddGenreSheet: View {
             }
             .navigationTitle("ジャンル追加")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
@@ -293,7 +293,7 @@ struct EditGenreSheet: View {
             }
             .navigationTitle("ジャンル編集")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false

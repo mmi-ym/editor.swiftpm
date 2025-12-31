@@ -12,19 +12,17 @@ struct WritingCalendarView: View {
     @State private var logToDelete: WriteLog?
     @Environment(\.dismiss) var dismiss
     
-    private var calendar = Calendar.current
-    
     // 選択された日のログ一覧
     private var logsForSelectedDate: [WriteLog] {
         dataManager.writeLogs.filter {
-            $0.novelId == novel.id && calendar.isDate($0.date, inSameDayAs: selectedDate)
+            $0.novelId == novel.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
         }
     }
     
     // 現在の月の全ログ
     private var logsForCurrentMonth: [WriteLog] {
-        let startOfMonth = calendar.startOfMonth(for: currentMonth)
-        let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
+        let startOfMonth = Calendar.current.startOfMonth(for: currentMonth)
+        let endOfMonth = Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
         
         return dataManager.writeLogs.filter {
             $0.novelId == novel.id && $0.date >= startOfMonth && $0.date <= endOfMonth
@@ -51,7 +49,7 @@ struct WritingCalendarView: View {
             }
             .navigationTitle("\(novel.title) 執筆記録")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
                         dismiss()
@@ -129,8 +127,8 @@ struct WritingCalendarView: View {
     
     // MARK: - Monthly and Yearly Totals
     private var monthlyTotal: Int {
-        let startOfMonth = calendar.startOfMonth(for: currentMonth)
-        let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
+        let startOfMonth = Calendar.current.startOfMonth(for: currentMonth)
+        let endOfMonth = Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth)!
         
         return dataManager.writeLogs
             .filter {
@@ -142,13 +140,13 @@ struct WritingCalendarView: View {
     }
     
     private var yearlyTotal: Int {
-        let year = calendar.component(.year, from: currentMonth)
-        let month = calendar.component(.month, from: currentMonth)
+        let year = Calendar.current.component(.year, from: currentMonth)
+        let month = Calendar.current.component(.month, from: currentMonth)
         
         // 1月1日から当月末日まで
-        let startOfYear = calendar.date(from: DateComponents(year: year, month: 1, day: 1))!
-        let endOfCurrentMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), 
-                                              to: calendar.startOfMonth(for: currentMonth))!
+        let startOfYear = Calendar.current.date(from: DateComponents(year: year, month: 1, day: 1))!
+        let endOfCurrentMonth = Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), 
+                                              to: Calendar.current.startOfMonth(for: currentMonth))!
         
         return dataManager.writeLogs
             .filter {
@@ -210,8 +208,8 @@ struct WritingCalendarView: View {
                     ForEach(week, id: \.date) { dayData in
                         CalendarDayCell(
                             dayData: dayData,
-                            isSelected: calendar.isDate(dayData.date, inSameDayAs: selectedDate),
-                            isToday: calendar.isDateInToday(dayData.date)
+                            isSelected: Calendar.current.isDate(dayData.date, inSameDayAs: selectedDate),
+                            isToday: Calendar.current.isDateInToday(dayData.date)
                         )
                         .onTapGesture {
                             if dayData.isCurrentMonth {
@@ -249,7 +247,7 @@ struct WritingCalendarView: View {
             // ログリスト
             if logsForSelectedDate.isEmpty {
                 VStack(spacing: 12) {
-                    Image(systemName: "calendar.badge.plus")
+                    Image(systemName: "Calendar.current.badge.plus")
                         .font(.system(size: 40))
                         .foregroundColor(.gray)
                     
@@ -301,16 +299,16 @@ struct WritingCalendarView: View {
     }
     
     private func changeMonth(by value: Int) {
-        if let newMonth = calendar.date(byAdding: .month, value: value, to: currentMonth) {
+        if let newMonth = Calendar.current.date(byAdding: .month, value: value, to: currentMonth) {
             currentMonth = newMonth
         }
     }
     
     private func generateCalendarDays() -> [CalendarDayData] {
         var days: [CalendarDayData] = []
-        let startOfMonth = calendar.startOfMonth(for: currentMonth)
-        let numberOfDays = calendar.numberOfDaysInMonth(for: currentMonth)
-        let firstWeekday = calendar.firstWeekdayOfMonth(for: currentMonth)
+        let startOfMonth = Calendar.current.startOfMonth(for: currentMonth)
+        let numberOfDays = Calendar.current.numberOfDaysInMonth(for: currentMonth)
+        let firstWeekday = Calendar.current.firstWeekdayOfMonth(for: currentMonth)
         
         // 前月の日付で埋める
         for _ in 1..<firstWeekday {
@@ -319,9 +317,9 @@ struct WritingCalendarView: View {
         
         // 当月の日付
         for day in 1...numberOfDays {
-            if let date = calendar.date(byAdding: .day, value: day - 1, to: startOfMonth) {
+            if let date = Calendar.current.date(byAdding: .day, value: day - 1, to: startOfMonth) {
                 let writeCount = logsForCurrentMonth
-                    .filter { calendar.isDate($0.date, inSameDayAs: date) }
+                    .filter { Calendar.current.isDate($0.date, inSameDayAs: date) }
                     .reduce(0) { $0 + $1.writeCount }
                 
                 days.append(CalendarDayData(date: date, day: day, isCurrentMonth: true, writeCount: writeCount))
