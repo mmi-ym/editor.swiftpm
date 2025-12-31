@@ -142,7 +142,6 @@ struct WritingCalendarView: View {
     
     private var yearlyTotal: Int {
         let year = Calendar.current.component(.year, from: currentMonth)
-        let month = Calendar.current.component(.month, from: currentMonth)
         
         // 1月1日から当月末日まで
         let startOfYear = Calendar.current.date(from: DateComponents(year: year, month: 1, day: 1))!

@@ -172,7 +172,7 @@ struct AllWritingCalendarView: View {
     
     // MARK: - Selected Date Details
     private var selectedDateDetails: some View {
-        ScrollView {
+        VStack(spacing: 0) {
             if logsForSelectedDate.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "calendar.badge.exclamationmark")
@@ -182,10 +182,9 @@ struct AllWritingCalendarView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 40)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                VStack(spacing: 8) {
+                List {
                     ForEach(logsForSelectedDate) { log in
                         if let novel = dataManager.novels.first(where: { $0.id == log.novelId }) {
                             WriteLogRowForAll(log: log, novel: novel)
@@ -205,11 +204,11 @@ struct AllWritingCalendarView: View {
                                     }
                                     .tint(.blue)
                                 }
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                         }
                     }
                 }
-                .padding(.horizontal)
-                .padding(.top, 16)
+                .listStyle(.plain)
             }
         }
     }
