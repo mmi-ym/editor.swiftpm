@@ -96,6 +96,12 @@ struct VerticalTextEditor: UIViewRepresentable {
             
             // attributedTextから文字列を取得
             parent.text = textView.attributedText?.string ?? ""
+            
+            // カーソル位置が見えるようにスクロール
+            if let selectedRange = textView.selectedTextRange {
+                let cursorRect = textView.caretRect(for: selectedRange.start)
+                textView.scrollRectToVisible(cursorRect, animated: true)
+            }
         }
     }
 }
