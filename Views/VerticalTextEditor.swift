@@ -10,10 +10,12 @@ class VerticalLayoutManager: NSLayoutManager {
         // 文字の描画範囲を取得
         let rect = self.boundingRect(forGlyphRange: glyphRange, in: container)
         
-        // 縦書き時の右側アンダーライン
+        // -90度回転後の座標系では：
+        // 元の「下」が「右」になる
+        // アンダーラインを右に出すには、元の座標系で「下」に配置する
         var underlineRect = rect
-        underlineRect.origin.x += (rect.width - 2.0) // 右端へ
-        underlineRect.size.width = 1.0              // 線の太さ
+        underlineRect.origin.y += (rect.height - 2.0) // 下端（回転後は右側）へ
+        underlineRect.size.height = 1.0              // 線の太さ
         
         // 描画（containerOriginを適用）
         if let context = UIGraphicsGetCurrentContext() {
@@ -50,9 +52,8 @@ struct VerticalTextEditor: UIViewRepresentable {
         textView.isEditable = true
         textView.isSelectable = true
         
-        // 縦書きは横スクロールになるため
-        textView.alwaysBounceHorizontal = true
-        textView.alwaysBounceVertical = false
+        // 縦書き表示のために-90度回転（反時計回り）
+        textView.transform = CGAffineTransform(rotationAngle: -.pi / 2)
         
         // キーボード入力を受け取るための設定
         textView.autocorrectionType = .no
