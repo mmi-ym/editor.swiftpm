@@ -15,12 +15,17 @@ struct VerticalTextEditor: UIViewRepresentable {
         // 縦書き設定（+90度回転 = 時計回り）
         textView.transform = CGAffineTransform(rotationAngle: .pi / 2)
         
+        // 書字方向を右から左に設定（未確定文字のアンダーバーが右に表示される）
+        textView.textAlignment = .right
+        textView.baseWritingDirection = .rightToLeft
+        
         // フォント設定
         let font = UIFont(name: "HiraMinProN-W3", size: 20) ?? UIFont.systemFont(ofSize: 20)
         
         // 縦書き用の属性を設定
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.alignment = .left
+        paragraphStyle.alignment = .right
+        paragraphStyle.baseWritingDirection = .rightToLeft
         
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
@@ -48,7 +53,8 @@ struct VerticalTextEditor: UIViewRepresentable {
         if currentText != text {
             let font = UIFont(name: "HiraMinProN-W3", size: 20) ?? UIFont.systemFont(ofSize: 20)
             let paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.alignment = .left
+            paragraphStyle.alignment = .right
+            paragraphStyle.baseWritingDirection = .rightToLeft
             
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
