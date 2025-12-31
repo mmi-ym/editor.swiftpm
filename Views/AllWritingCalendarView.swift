@@ -297,7 +297,7 @@ struct AllWritingCalendarView: View {
     }
     
     private func deleteLog(_ log: WriteLog) {
-        dataManager.deleteWriteLog(log)
+        dataManager.deleteWriteLog(novelId: log.novelId, date: log.date)
     }
 }
 
