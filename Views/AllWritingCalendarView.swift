@@ -167,7 +167,7 @@ struct AllWritingCalendarView: View {
             }
             .padding(.horizontal)
         }
-        .padding(.vertical)
+        .padding(.vertical, 8)
     }
     
     // MARK: - Selected Date Details
@@ -232,7 +232,8 @@ struct AllWritingCalendarView: View {
                     .font(.headline)
             }
         }
-        .padding()
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
         .background(Color(UIColor.secondarySystemBackground))
     }
     

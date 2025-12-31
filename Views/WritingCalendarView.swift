@@ -106,7 +106,7 @@ struct WritingCalendarView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+            .padding(.vertical, 8)
             
             Divider()
             
@@ -121,7 +121,7 @@ struct WritingCalendarView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+            .padding(.vertical, 8)
         }
         .background(Color(UIColor.secondarySystemBackground))
     }
@@ -197,7 +197,7 @@ struct WritingCalendarView: View {
                         .frame(maxWidth: .infinity)
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 4)
             
             // カレンダーグリッド
             let days = generateCalendarDays()

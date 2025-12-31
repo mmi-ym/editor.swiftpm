@@ -24,7 +24,6 @@ struct NovelEditorView: View {
                 
                 // 縦書きエディタ
                 VerticalTextEditor(text: $bodyText)
-                    .padding()
             }
             
             // フッター（文字数表示）
@@ -73,6 +72,7 @@ struct NovelEditorView: View {
                 }
             }
         }
+        .toolbarBackground(.visible, for: .navigationBar)
         .sheet(isPresented: $showingTitleEditSheet) {
             EditNovelTitleSheet(novel: $novel, isPresented: $showingTitleEditSheet)
         }
