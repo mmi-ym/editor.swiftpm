@@ -8,74 +8,51 @@ struct NovelListView: View {
     @State private var editingNovel: Novel?
     @State private var showingDeleteAlert = false
     @State private var novelToDelete: Novel?
-    @State private var selectedNovel: Novel?
-    @State private var showingEditor = false
-    @Environment(\.dismiss) var dismiss
     
     private var novels: [Novel] {
         dataManager.getNovels(forGenreId: genre.id)
     }
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                if novels.isEmpty {
-                    emptyStateView
-                } else {
-                    novelListView
+        ZStack {
+            if novels.isEmpty {
+                emptyStateView
+            } else {
+                novelListView
+            }
+        }
+        .navigationTitle("\(genre.name) 作品一覧")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    showingAddSheet = true
+                } label: {
+                    Label("追加", systemImage: "plus")
                 }
             }
-            .navigationTitle("\(genre.name) 作品一覧")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .semibold))
-                            Text("ジャンル一覧")
-                        }
-                    }
-                }
+        }
+        .sheet(isPresented: $showingAddSheet) {
+            AddNovelSheet(genre: genre, isPresented: $showingAddSheet)
+        }
+        .sheet(isPresented: $showingEditSheet) {
+            if let novel = editingNovel {
+                EditNovelSheet(
+                    novel: novel,
+                    isPresented: $showingEditSheet
+                )
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingAddSheet = true
-                    } label: {
-                        Label("追加", systemImage: "plus")
-                    }
-                }
-            }
-            .sheet(isPresented: $showingAddSheet) {
-                AddNovelSheet(genre: genre, isPresented: $showingAddSheet)
-            }
-            .sheet(isPresented: $showingEditSheet) {
-                if let novel = editingNovel {
-                    EditNovelSheet(
-                        novel: novel,
-                        isPresented: $showingEditSheet
-                    )
-                }
-            }
-            .sheet(isPresented: $showingEditor) {
-                if let novel = selectedNovel {
-                    NovelEditorView(novel: novel)
-                }
-            }
-            .alert("作品を削除", isPresented: $showingDeleteAlert) {
-                Button("キャンセル", role: .cancel) { }
-                Button("削除", role: .destructive) {
-                    if let novel = novelToDelete {
-                        deleteNovel(novel)
-                    }
-                }
-            } message: {
+        }
+        .alert("作品を削除", isPresented: $showingDeleteAlert) {
+            Button("キャンセル", role: .cancel) { }
+            Button("削除", role: .destructive) {
                 if let novel = novelToDelete {
-                    Text("「\(novel.title)」とすべての関連データを削除します。この操作は取り消せません。")
+                    deleteNovel(novel)
                 }
+            }
+        } message: {
+            if let novel = novelToDelete {
+                Text("「\(novel.title)」とすべての関連データを削除します。この操作は取り消せません。")
             }
         }
     }
@@ -84,13 +61,9 @@ struct NovelListView: View {
     private var novelListView: some View {
         List {
             ForEach(novels) { novel in
-                Button {
-                    selectedNovel = novel
-                    showingEditor = true
-                } label: {
+                NavigationLink(destination: NovelEditorView(novel: novel)) {
                     NovelRow(novel: novel)
                 }
-                .buttonStyle(.plain)
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(role: .destructive) {
                         novelToDelete = novel
