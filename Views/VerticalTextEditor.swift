@@ -61,7 +61,10 @@ struct VerticalTextEditor: UIViewRepresentable {
             // カーソル位置を保存
             let selectedRange = uiView.selectedRange
             
+            // 更新フラグを設定して無限ループを防ぐ
+            context.coordinator.isUpdating = true
             uiView.attributedText = attributedString
+            context.coordinator.isUpdating = false
             
             // カーソル位置を復元（範囲チェック）
             if selectedRange.location <= text.count {
@@ -76,13 +79,18 @@ struct VerticalTextEditor: UIViewRepresentable {
     
     class Coordinator: NSObject, UITextViewDelegate {
         var parent: VerticalTextEditor
+        var isUpdating = false
         
         init(_ parent: VerticalTextEditor) {
             self.parent = parent
         }
         
         func textViewDidChange(_ textView: UITextView) {
-            parent.text = textView.text
+            // プログラムからの更新中は無視
+            guard !isUpdating else { return }
+            
+            // attributedTextから文字列を取得
+            parent.text = textView.attributedText?.string ?? ""
         }
     }
 }
