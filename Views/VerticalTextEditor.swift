@@ -113,12 +113,8 @@ struct VerticalTextEditor: UIViewRepresentable {
             // 更新フラグを設定して無限ループを防ぐ
             context.coordinator.isUpdating = true
             
-            // textStorageに設定
-            if let textStorage = uiView.textStorage {
-                textStorage.setAttributedString(attributedString)
-            } else {
-                uiView.attributedText = attributedString
-            }
+            // textStorageに設定（UITextViewは常にtextStorageを持つ）
+            uiView.textStorage.setAttributedString(attributedString)
             
             context.coordinator.isUpdating = false
             
