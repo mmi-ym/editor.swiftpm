@@ -7,6 +7,8 @@ struct GenreListView: View {
     @State private var editingGenre: Genre?
     @State private var showingDeleteAlert = false
     @State private var genreToDelete: Genre?
+    @State private var selectedGenre: Genre?
+    @State private var showingNovelList = false
     
     var body: some View {
         NavigationView {
@@ -49,6 +51,11 @@ struct GenreListView: View {
                     )
                 }
             }
+            .sheet(isPresented: $showingNovelList) {
+                if let genre = selectedGenre {
+                    NovelListView(genre: genre)
+                }
+            }
             .alert("ジャンルを削除", isPresented: $showingDeleteAlert) {
                 Button("キャンセル", role: .cancel) { }
                 Button("削除", role: .destructive) {
@@ -76,7 +83,10 @@ struct GenreListView: View {
     private var genreListView: some View {
         List {
             ForEach(dataManager.genres) { genre in
-                NavigationLink(destination: NovelListView(genre: genre)) {
+                Button {
+                    selectedGenre = genre
+                    showingNovelList = true
+                } label: {
                     GenreRow(genre: genre)
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {

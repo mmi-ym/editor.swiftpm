@@ -15,69 +15,92 @@ struct NovelEditorView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            // 縦書きエディタ
-            ZStack {
-                // 背景色
-                Color(UIColor.systemBackground)
-                    .ignoresSafeArea()
-                
+        NavigationView {
+            VStack(spacing: 0) {
                 // 縦書きエディタ
-                VerticalTextEditor(text: $bodyText)
-                    .padding()
+                ZStack {
+                    // 和紙風背景色
+                    Color(red: 0.992, green: 0.984, blue: 0.969)
+                        .ignoresSafeArea()
+                    
+                    // 縦書きエディタ
+                    VerticalTextEditor(text: $bodyText)
+                        .padding()
+                }
+                
+                // フッター（文字数表示）
+                HStack {
+                    Label("\(formatNumber(bodyText.count))文字", systemImage: "character")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    if bodyText.count != novel.bodyCount {
+                        Text("保存中...")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(Color(UIColor.secondarySystemBackground))
             }
-            
-            // フッター（文字数表示）
-            HStack {
-                Label("\(formatNumber(bodyText.count))文字", systemImage: "character")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                
-                Spacer()
-                
-                if bodyText.count != novel.bodyCount {
-                    Text("保存中...")
-                        .font(.caption)
-                        .foregroundColor(.blue)
+            .navigationTitle(novel.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text("作品一覧")
+                        }
+                    }
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(Color(UIColor.secondarySystemBackground))
-        }
-        .navigationTitle(novel.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Menu {
-                    Button {
-                        showingTitleEditSheet = true
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button {
+                            showingTitleEditSheet = true
+                        } label: {
+                            Label("タイトルを変更", systemImage: "pencil")
+                        }
+                        
+                        Button {
+                            showingSettingsView = true
+                        } label: {
+                            Label("設定を表示", systemImage: "gearshape")
+                        }
+                        
+                        Button {
+                            showingImageConversion = true
+                        } label: {
+                            Label("画像に変換", systemImage: "photo")
+                        }
                     } label: {
-                        Label("タイトルを変更", systemImage: "pencil")
+                        Image(systemName: "ellipsis.circle")
+                            .font(.system(size: 18))
                     }
-                    
-                    Button {
-                        showingSettingsView = true
-                    } label: {
-                        Label("設定を表示", systemImage: "gearshape")
-                    }
-                    
-                    Button {
-                        showingImageConversion = true
-                    } label: {
-                        Label("画像に変換", systemImage: "photo")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                        .font(.system(size: 18))
                 }
             }
+            .sheet(isPresented: $showingTitleEditSheet) {
+                EditNovelTitleSheet(novel: $novel, isPresented: $showingTitleEditSheet)
+            }
+            .sheet(isPresented: $showingSettingsView) {
+                SettingsListView(novel: novel)
+            }
+            .sheet(isPresented: $showingImageConversion) {
+                ImageConversionPlaceholderView()
+            }
+            .onChange(of: bodyText) { newValue in
+                saveNovel(newValue)
+            }
         }
-        .sheet(isPresented: $showingTitleEditSheet) {
-            EditNovelTitleSheet(novel: $novel, isPresented: $showingTitleEditSheet)
-        }
-        .sheet(isPresented: $showingSettingsView) {
-            SettingsListView(novel: novel)
+    }
         }
         .sheet(isPresented: $showingImageConversion) {
             ImageConversionPlaceholderView()

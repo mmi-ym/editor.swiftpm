@@ -8,58 +8,73 @@ struct NovelListView: View {
     @State private var editingNovel: Novel?
     @State private var showingDeleteAlert = false
     @State private var novelToDelete: Novel?
+    @State private var selectedNovel: Novel?
+    @State private var showingEditor = false
+    @Environment(\.dismiss) var dismiss
     
     private var novels: [Novel] {
         dataManager.getNovels(forGenreId: genre.id)
     }
     
     var body: some View {
-        ZStack {
-            if novels.isEmpty {
-                emptyStateView
-            } else {
-                novelListView
-            }
-        }
-        .navigationTitle("\(genre.name) 作品一覧")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showingAddSheet = true
-                } label: {
-                    Label("追加", systemImage: "plus")
-                }
-            }
-        }
-        .sheet(isPresented: $showingAddSheet) {
-            AddNovelSheet(genre: genre, isPresented: $showingAddSheet)
-        }
-        .sheet(isPresented: $showingEditSheet) {
-            if let novel = editingNovel {
-                EditNovelSheet(
-                    novel: novel,
-                    isPresented: $showingEditSheet
-                )
-            }
-        }
-        .alert("作品を削除", isPresented: $showingDeleteAlert) {
-            Button("キャンセル", role: .cancel) { }
-            Button("削除", role: .destructive) {
-                if let novel = novelToDelete {
-                    deleteNovel(novel)
-                }
-            }
-        } message: {
-            if let novel = novelToDelete {
-                let settingsCount = dataManager.getNovelSettings(forNovelId: novel.id).count
-                let logsCount = dataManager.getWriteLogs(forNovelId: novel.id).count
-                let thoughtsCount = dataManager.getThoughts(forNovelId: novel.id).count
-                
-                if settingsCount > 0 || logsCount > 0 || thoughtsCount > 0 {
-                    Text("「\(novel.title)」を削除すると、設定\(settingsCount)件、執筆記録\(logsCount)件、メモ\(thoughtsCount)件も削除されます。この操作は取り消せません。")
+        NavigationView {
+            ZStack {
+                if novels.isEmpty {
+                    emptyStateView
                 } else {
-                    Text("「\(novel.title)」を削除します。この操作は取り消せません。")
+                    novelListView
+                }
+            }
+            .navigationTitle("\(genre.name) 作品一覧")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text("ジャンル一覧")
+                        }
+                    }
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showingAddSheet = true
+                    } label: {
+                        Label("追加", systemImage: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingAddSheet) {
+                AddNovelSheet(genre: genre, isPresented: $showingAddSheet)
+            }
+            .sheet(isPresented: $showingEditSheet) {
+                if let novel = editingNovel {
+                    EditNovelSheet(
+                        novel: novel,
+                        isPresented: $showingEditSheet
+                    )
+                }
+            }
+            .sheet(isPresented: $showingEditor) {
+                if let novel = selectedNovel {
+                    NovelEditorView(novel: novel)
+                }
+            }
+            .alert("作品を削除", isPresented: $showingDeleteAlert) {
+                Button("キャンセル", role: .cancel) { }
+                Button("削除", role: .destructive) {
+                    if let novel = novelToDelete {
+                        deleteNovel(novel)
+                    }
+                }
+            } message: {
+                if let novel = novelToDelete {
+                    Text("「\(novel.title)」とすべての関連データを削除します。この操作は取り消せません。")
                 }
             }
         }
@@ -69,13 +84,11 @@ struct NovelListView: View {
     private var novelListView: some View {
         List {
             ForEach(novels) { novel in
-                NavigationLink(destination: NovelEditorView(novel: novel)) {
+                Button {
+                    selectedNovel = novel
+                    showingEditor = true
+                } label: {
                     NovelRow(novel: novel)
-                }
-                .contextMenu {
-                    NavigationLink(destination: WritingCalendarView(novel: novel)) {
-                        Label("執筆記録", systemImage: "calendar")
-                    }
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(role: .destructive) {
