@@ -5,31 +5,23 @@ import UIKit
 class VerticalLayoutManager: NSLayoutManager {
     override func drawUnderline(forGlyphRange glyphRange: NSRange, underlineType underlineVal: NSUnderlineStyle, baselineOffset: CGFloat, lineFragmentRect lineRect: CGRect, lineFragmentGlyphRange lineGlyphRange: NSRange, containerOrigin: CGPoint) {
         
-        // 縦書きの場合のみ処理をカスタマイズ
-        // (TextView側で文字の向きを縦にしている前提)
+        guard let container = textContainers.first else { return }
         
-        let firstGlyphIndex = glyphRange.location
-        let lastGlyphIndex = NSMaxRange(glyphRange) - 1
+        // 文字の描画範囲を取得
+        let rect = self.boundingRect(forGlyphRange: glyphRange, in: container)
         
-        let firstRect = self.boundingRect(forGlyphRange: NSRange(location: firstGlyphIndex, length: 1), in: textContainers.first!)
-        let lastRect = self.boundingRect(forGlyphRange: NSRange(location: lastGlyphIndex, length: 1), in: textContainers.first!)
-        
-        // アンダーラインの描画範囲を計算
-        // 通常は文字の下（横書きの場合）だが、縦書きでは文字の右側に線を引くように調整します
-        // デフォルトでは左側に引かれるため、widthの右端にオフセットさせます
-        var underlineRect = firstRect.union(lastRect)
-        underlineRect.origin.x += (underlineRect.width - 1.0) // 1.0は線の太さを固定
-        underlineRect.size.width = 1.0 // 線の太さを固定
+        // 縦書きの場合：文字の右端に線を引く
+        // Viewを回転させていない前提の座標計算
+        var underlineRect = rect
+        underlineRect.origin.x += (rect.width - 1.5) // 右側にオフセット
+        underlineRect.size.width = 1.0               // 線の太さ
         
         // コンテナの原点を加算
         underlineRect.origin.x += containerOrigin.x
         underlineRect.origin.y += containerOrigin.y
-        
-        // 描画
+
         if let context = UIGraphicsGetCurrentContext() {
             context.saveGState()
-            // 未確定文字列らしい色（Apple標準に近い青など）を指定
-            // 属性文字から色を取得して使うこともできます
             context.setFillColor(UIColor.systemBlue.cgColor)
             context.fill(underlineRect)
             context.restoreGState()
@@ -42,17 +34,19 @@ struct VerticalTextEditor: UIViewRepresentable {
     @Binding var text: String
     
     func makeUIView(context: Context) -> UITextView {
-        // カスタムLayoutManagerを使用
+        // 1. 各コンポーネントを独立して生成
+        let storage = NSTextStorage()
         let layoutManager = VerticalLayoutManager()
-        let textContainer = NSTextContainer()
-        let textStorage = NSTextStorage()
+        let container = NSTextContainer(size: .zero)
         
-        textContainer.lineFragmentPadding = 0
+        // 2. 正しい順序で接続（重要！）
+        storage.addLayoutManager(layoutManager)
+        layoutManager.addTextContainer(container)
         
-        layoutManager.addTextContainer(textContainer)
-        textStorage.addLayoutManager(layoutManager)
+        // 3. このコンテナを使ってTextViewを生成
+        let textView = UITextView(frame: .zero, textContainer: container)
         
-        let textView = UITextView(frame: .zero, textContainer: textContainer)
+        // 基本設定
         textView.delegate = context.coordinator
         textView.backgroundColor = UIColor(red: 0.992, green: 0.984, blue: 0.969, alpha: 1.0)
         textView.textColor = .black
@@ -60,14 +54,15 @@ struct VerticalTextEditor: UIViewRepresentable {
         textView.isEditable = true
         textView.isSelectable = true
         
+        // 縦書きは横スクロールになるため
+        textView.alwaysBounceHorizontal = true
+        textView.alwaysBounceVertical = false
+        
         // キーボード入力を受け取るための設定
         textView.autocorrectionType = .no
         textView.autocapitalizationType = .none
         
-        // 縦書き設定（+90度回転 = 時計回り）
-        textView.transform = CGAffineTransform(rotationAngle: .pi / 2)
-        
-        // 通常の左揃え（回転後は上揃えになる）
+        // 通常の左揃え
         textView.textAlignment = .left
         
         // フォント設定
@@ -91,7 +86,7 @@ struct VerticalTextEditor: UIViewRepresentable {
         // 初期テキストがある場合は属性付きで設定
         if !text.isEmpty {
             let attributedString = NSMutableAttributedString(string: text, attributes: attributes)
-            textStorage.setAttributedString(attributedString)
+            storage.setAttributedString(attributedString)
         }
         
         // 非同期でfirst responderにする
@@ -104,7 +99,7 @@ struct VerticalTextEditor: UIViewRepresentable {
     
     func updateUIView(_ uiView: UITextView, context: Context) {
         // テキストの内容が変わった場合のみ更新
-        let currentText = uiView.attributedText?.string ?? ""
+        let currentText = uiView.textStorage.string
         if currentText != text {
             let font = UIFont(name: "HiraMinProN-W3", size: 20) ?? UIFont.systemFont(ofSize: 20)
             let paragraphStyle = NSMutableParagraphStyle()
@@ -124,7 +119,7 @@ struct VerticalTextEditor: UIViewRepresentable {
             // 更新フラグを設定して無限ループを防ぐ
             context.coordinator.isUpdating = true
             
-            // textStorageに設定（UITextViewは常にtextStorageを持つ）
+            // storageに設定（textStorageは常に存在する）
             uiView.textStorage.setAttributedString(attributedString)
             
             context.coordinator.isUpdating = false
