@@ -22,20 +22,19 @@ struct GenreListView: View {
             }
             .navigationTitle("ジャンル一覧")
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        showingAllWritingCalendar = true
-                    } label: {
-                        Label("執筆記録", systemImage: "calendar")
-                    }
-                }
-            }
-            .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingAddSheet = true
-                    } label: {
-                        Label("追加", systemImage: "plus")
+                    HStack(spacing: 16) {
+                        Button {
+                            showingAllWritingCalendar = true
+                        } label: {
+                            Image(systemName: "calendar")
+                        }
+                        
+                        Button {
+                            showingAddSheet = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
                     }
                 }
             }
