@@ -1,34 +1,12 @@
 import SwiftUI
 import UIKit
 
-/// 縦書き対応のUITextView（未確定文字のアンダーバーを右に表示）
-class VerticalUITextView: UITextView {
-    override var markedTextStyle: [NSAttributedString.Key : Any]? {
-        get {
-            // 未確定文字（変換中の文字）のスタイルを取得
-            let style = super.markedTextStyle ?? [:]
-            var modifiedStyle = style
-            
-            // 右揃えのparagraphStyleを設定
-            let paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.alignment = .right
-            paragraphStyle.baseWritingDirection = .rightToLeft
-            modifiedStyle[.paragraphStyle] = paragraphStyle
-            
-            return modifiedStyle
-        }
-        set {
-            super.markedTextStyle = newValue
-        }
-    }
-}
-
 /// 縦書きテキストエディタ
 struct VerticalTextEditor: UIViewRepresentable {
     @Binding var text: String
     
-    func makeUIView(context: Context) -> VerticalUITextView {
-        let textView = VerticalUITextView()
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
         textView.delegate = context.coordinator
         textView.backgroundColor = UIColor(red: 0.992, green: 0.984, blue: 0.969, alpha: 1.0)
         textView.textColor = .black
@@ -37,16 +15,15 @@ struct VerticalTextEditor: UIViewRepresentable {
         // 縦書き設定（+90度回転 = 時計回り）
         textView.transform = CGAffineTransform(rotationAngle: .pi / 2)
         
-        // 書字方向を右から左に設定（未確定文字のアンダーバーが右に表示される）
-        textView.textAlignment = .right
+        // 通常の左揃え（回転後は上揃えになる）
+        textView.textAlignment = .left
         
         // フォント設定
         let font = UIFont(name: "HiraMinProN-W3", size: 20) ?? UIFont.systemFont(ofSize: 20)
         
         // 縦書き用の属性を設定
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.alignment = .right
-        paragraphStyle.baseWritingDirection = .rightToLeft
+        paragraphStyle.alignment = .left
         
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
@@ -68,14 +45,13 @@ struct VerticalTextEditor: UIViewRepresentable {
         return textView
     }
     
-    func updateUIView(_ uiView: VerticalUITextView, context: Context) {
+    func updateUIView(_ uiView: UITextView, context: Context) {
         // テキストの内容が変わった場合のみ更新
         let currentText = uiView.attributedText?.string ?? ""
         if currentText != text {
             let font = UIFont(name: "HiraMinProN-W3", size: 20) ?? UIFont.systemFont(ofSize: 20)
             let paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.alignment = .right
-            paragraphStyle.baseWritingDirection = .rightToLeft
+            paragraphStyle.alignment = .left
             
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
