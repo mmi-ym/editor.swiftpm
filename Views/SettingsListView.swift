@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsListView: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     let novel: Novel
     @State private var showingAddSheet = false
     @State private var expandedSections: Set<NovelSettings.AttributeType> = [.character, .plot, .terminology, .other]
@@ -165,7 +165,7 @@ struct SettingRow: View {
 
 // MARK: - Add Settings Sheet
 struct AddSettingsSheet: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     let novel: Novel
     @Binding var isPresented: Bool
     
@@ -230,7 +230,7 @@ struct AddSettingsSheet: View {
 struct SettingsEditorView: View {
     let novel: Novel
     @State var settings: NovelSettings
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     @State private var bodyText: String
     @State private var showingTitleEditSheet = false
     @Environment(\.dismiss) var dismiss
@@ -373,7 +373,7 @@ struct SettingsEditorView: View {
 
 // MARK: - Edit Settings Title Sheet
 struct EditSettingsTitleSheet: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     @Binding var settings: NovelSettings
     @Binding var isPresented: Bool
     

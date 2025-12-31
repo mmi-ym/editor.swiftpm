@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - Add Write Log Sheet
 struct AddWriteLogSheet: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     let novel: Novel
     let selectedDate: Date
     @Binding var isPresented: Bool
@@ -117,7 +117,7 @@ struct AddWriteLogSheet: View {
 
 // MARK: - Edit Write Log Sheet
 struct EditWriteLogSheet: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     let novel: Novel
     let log: WriteLog
     @Binding var isPresented: Bool

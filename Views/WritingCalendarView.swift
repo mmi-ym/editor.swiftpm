@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct WritingCalendarView: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     let novel: Novel
     @State private var selectedDate: Date = Date()
     @State private var currentMonth: Date = Date()
@@ -391,7 +391,7 @@ struct CalendarDayCell: View {
 // MARK: - Write Log Row
 struct WriteLogRow: View {
     let log: WriteLog
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     
     private var novel: Novel? {
         dataManager.novels.first { $0.id == log.novelId }

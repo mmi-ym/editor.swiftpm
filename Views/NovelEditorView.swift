@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct NovelEditorView: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     @State var novel: Novel
     @State private var bodyText: String
     @State private var showingTitleEditSheet = false
@@ -137,7 +137,7 @@ struct VerticalTextEditor: View {
 
 // MARK: - Edit Novel Title Sheet
 struct EditNovelTitleSheet: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     @Binding var novel: Novel
     @Binding var isPresented: Bool
     

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct GenreListView: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     @State private var showingAddSheet = false
     @State private var showingEditSheet = false
     @State private var editingGenre: Genre?
@@ -135,7 +135,7 @@ struct GenreListView: View {
 // MARK: - Genre Row
 struct GenreRow: View {
     let genre: Genre
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     
     private var novelCount: Int {
         dataManager.novels.filter { $0.genreId == genre.id }.count
@@ -174,7 +174,7 @@ struct GenreRow: View {
 
 // MARK: - Add Genre Sheet
 struct AddGenreSheet: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     @Binding var isPresented: Bool
     
     @State private var name: String = ""
@@ -240,7 +240,7 @@ struct AddGenreSheet: View {
 
 // MARK: - Edit Genre Sheet
 struct EditGenreSheet: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     let genre: Genre
     @Binding var isPresented: Bool
     

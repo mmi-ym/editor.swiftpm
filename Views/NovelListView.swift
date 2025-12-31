@@ -2,7 +2,7 @@ import SwiftUI
 
 struct NovelListView: View {
     let genre: Genre
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     @State private var showingAddSheet = false
     @State private var showingEditSheet = false
     @State private var editingNovel: Novel?
@@ -184,7 +184,7 @@ struct NovelRow: View {
 
 // MARK: - Add Novel Sheet
 struct AddNovelSheet: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     let genre: Genre
     @Binding var isPresented: Bool
     
@@ -238,7 +238,7 @@ struct AddNovelSheet: View {
 
 // MARK: - Edit Novel Sheet
 struct EditNovelSheet: View {
-    @StateObject private var dataManager = DataManager.shared
+    @ObservedObject private var dataManager = DataManager.shared
     let novel: Novel
     @Binding var isPresented: Bool
     

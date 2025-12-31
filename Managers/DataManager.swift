@@ -1,7 +1,6 @@
 import Foundation
 
 /// アプリ全体のデータを管理するマネージャークラス
-@MainActor
 class DataManager: ObservableObject {
     // MARK: - Published Properties
     @Published var genres: [Genre] = []
@@ -28,7 +27,10 @@ class DataManager: ObservableObject {
     static let shared = DataManager()
     
     private init() {
-        loadAllData()
+        // 初期化を遅延実行
+        DispatchQueue.main.async { [weak self] in
+            self?.loadAllData()
+        }
     }
     
     // MARK: - Load Data
