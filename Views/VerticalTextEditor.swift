@@ -44,8 +44,10 @@ struct VerticalTextEditor: UIViewRepresentable {
     func makeUIView(context: Context) -> UITextView {
         // カスタムLayoutManagerを使用
         let layoutManager = VerticalLayoutManager()
-        let textStorage = NSTextStorage()
         let textContainer = NSTextContainer()
+        let textStorage = NSTextStorage()
+        
+        textContainer.lineFragmentPadding = 0
         
         layoutManager.addTextContainer(textContainer)
         textStorage.addLayoutManager(layoutManager)
@@ -82,8 +84,8 @@ struct VerticalTextEditor: UIViewRepresentable {
         
         // 初期テキストがある場合は属性付きで設定
         if !text.isEmpty {
-            let attributedString = NSAttributedString(string: text, attributes: attributes)
-            textView.attributedText = attributedString
+            let attributedString = NSMutableAttributedString(string: text, attributes: attributes)
+            textStorage.setAttributedString(attributedString)
         }
         
         return textView
@@ -103,14 +105,21 @@ struct VerticalTextEditor: UIViewRepresentable {
                 .verticalGlyphForm: true
             ]
             
-            let attributedString = NSAttributedString(string: text, attributes: attributes)
+            let attributedString = NSMutableAttributedString(string: text, attributes: attributes)
             
             // カーソル位置を保存
             let selectedRange = uiView.selectedRange
             
             // 更新フラグを設定して無限ループを防ぐ
             context.coordinator.isUpdating = true
-            uiView.attributedText = attributedString
+            
+            // textStorageに設定
+            if let textStorage = uiView.textStorage {
+                textStorage.setAttributedString(attributedString)
+            } else {
+                uiView.attributedText = attributedString
+            }
+            
             context.coordinator.isUpdating = false
             
             // カーソル位置を復元（範囲チェック）
