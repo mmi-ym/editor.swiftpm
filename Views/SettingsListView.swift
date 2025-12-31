@@ -4,7 +4,6 @@ struct SettingsListView: View {
     @ObservedObject private var dataManager = DataManager.shared
     let novel: Novel
     @State private var showingAddSheet = false
-    @State private var expandedSections: Set<NovelSettings.AttributeType> = [.character, .plot, .terminology, .other]
     @State private var showingDeleteAlert = false
     @State private var settingToDelete: NovelSettings?
     @Environment(\.dismiss) var dismiss
@@ -69,16 +68,7 @@ struct SettingsListView: View {
         List {
             ForEach(NovelSettings.AttributeType.allCases, id: \.self) { type in
                 if let settings = groupedSettings[type], !settings.isEmpty {
-                    Section(isExpanded: Binding(
-                        get: { expandedSections.contains(type) },
-                        set: { isExpanded in
-                            if isExpanded {
-                                expandedSections.insert(type)
-                            } else {
-                                expandedSections.remove(type)
-                            }
-                        }
-                    )) {
+                    Section {
                         ForEach(settings) { setting in
                             NavigationLink(destination: SettingsEditorView(novel: novel, settings: setting)) {
                                 SettingRow(setting: setting)
