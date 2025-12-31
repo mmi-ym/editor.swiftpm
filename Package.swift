@@ -1,16 +1,18 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.6
 
 import PackageDescription
+import AppleProductTypes
 
 let package = Package(
     name: "NovelEditor",
     platforms: [
-        .iOS(.v16)
+        .iOS("16.0")
     ],
     products: [
         .iOSApplication(
             name: "NovelEditor",
             targets: ["AppModule"],
+            bundleIdentifier: "com.noveleditor.app",
             displayVersion: "1.0",
             bundleVersion: "1",
             appIcon: .placeholder(icon: .book),
