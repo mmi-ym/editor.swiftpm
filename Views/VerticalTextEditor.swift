@@ -1,12 +1,56 @@
 import SwiftUI
 import UIKit
 
+/// 縦書き対応のNSLayoutManager（アンダーラインを右側に描画）
+class VerticalLayoutManager: NSLayoutManager {
+    override func drawUnderline(forGlyphRange glyphRange: NSRange, underlineType underlineVal: NSUnderlineStyle, baselineOffset: CGFloat, lineFragmentRect lineRect: CGRect, lineFragmentGlyphRange lineGlyphRange: NSRange, containerOrigin: CGPoint) {
+        
+        // 縦書きの場合のみ処理をカスタマイズ
+        // (TextView側で文字の向きを縦にしている前提)
+        
+        let firstGlyphIndex = glyphRange.location
+        let lastGlyphIndex = NSMaxRange(glyphRange) - 1
+        
+        let firstRect = self.boundingRect(forGlyphRange: NSRange(location: firstGlyphIndex, length: 1), in: textContainers.first!)
+        let lastRect = self.boundingRect(forGlyphRange: NSRange(location: lastGlyphIndex, length: 1), in: textContainers.first!)
+        
+        // アンダーラインの描画範囲を計算
+        // 通常は文字の下（横書きの場合）だが、縦書きでは文字の右側に線を引くように調整します
+        // デフォルトでは左側に引かれるため、widthの右端にオフセットさせます
+        var underlineRect = firstRect.union(lastRect)
+        underlineRect.origin.x += (underlineRect.width - 1.0) // 1.0は線の太さを固定
+        underlineRect.size.width = 1.0 // 線の太さを固定
+        
+        // コンテナの原点を加算
+        underlineRect.origin.x += containerOrigin.x
+        underlineRect.origin.y += containerOrigin.y
+        
+        // 描画
+        if let context = UIGraphicsGetCurrentContext() {
+            context.saveGState()
+            // 未確定文字列らしい色（Apple標準に近い青など）を指定
+            // 属性文字から色を取得して使うこともできます
+            context.setFillColor(UIColor.systemBlue.cgColor)
+            context.fill(underlineRect)
+            context.restoreGState()
+        }
+    }
+}
+
 /// 縦書きテキストエディタ
 struct VerticalTextEditor: UIViewRepresentable {
     @Binding var text: String
     
     func makeUIView(context: Context) -> UITextView {
-        let textView = UITextView()
+        // カスタムLayoutManagerを使用
+        let layoutManager = VerticalLayoutManager()
+        let textStorage = NSTextStorage()
+        let textContainer = NSTextContainer()
+        
+        layoutManager.addTextContainer(textContainer)
+        textStorage.addLayoutManager(layoutManager)
+        
+        let textView = UITextView(frame: .zero, textContainer: textContainer)
         textView.delegate = context.coordinator
         textView.backgroundColor = UIColor(red: 0.992, green: 0.984, blue: 0.969, alpha: 1.0)
         textView.textColor = .black
