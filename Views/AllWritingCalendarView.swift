@@ -184,28 +184,26 @@ struct AllWritingCalendarView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List {
-                    ForEach(logsForSelectedDate) { log in
-                        if let novel = dataManager.novels.first(where: { $0.id == log.novelId }) {
-                            WriteLogRowForAll(log: log, novel: novel)
-                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                    Button(role: .destructive) {
-                                        logToDelete = log
-                                        showingDeleteAlert = true
-                                    } label: {
-                                        Label("削除", systemImage: "trash")
-                                    }
-                                    
-                                    Button {
-                                        logToEdit = log
-                                        showingEditSheet = true
-                                    } label: {
-                                        Label("編集", systemImage: "pencil")
-                                    }
-                                    .tint(.blue)
+                List(logsForSelectedDate) { log in
+                    if let novel = dataManager.novels.first(where: { $0.id == log.novelId }) {
+                        WriteLogRowForAll(log: log, novel: novel)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    logToDelete = log
+                                    showingDeleteAlert = true
+                                } label: {
+                                    Label("削除", systemImage: "trash")
                                 }
-                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        }
+                                
+                                Button {
+                                    logToEdit = log
+                                    showingEditSheet = true
+                                } label: {
+                                    Label("編集", systemImage: "pencil")
+                                }
+                                .tint(.blue)
+                            }
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
                 }
                 .listStyle(.plain)
