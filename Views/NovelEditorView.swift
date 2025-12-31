@@ -47,8 +47,8 @@ struct NovelEditorView: View {
         }
         .navigationTitle(novel.title)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(content: {
-            ToolbarItem(placement: .navigationBarTrailing) {
+        .toolbar {
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
                 Menu {
                     Button {
                         showingTitleEditSheet = true
@@ -175,14 +175,14 @@ struct EditNovelTitleSheet: View {
             }
             .navigationTitle("タイトル変更")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
-                ToolbarItem(placement: .cancellationAction) {
+            .toolbar {
+                ToolbarItemGroup(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
                     }
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItemGroup(placement: .confirmationAction) {
                     Button("保存") {
                         updateTitle()
                     }
@@ -220,8 +220,8 @@ struct NovelSettingsPlaceholderView: View {
             }
             .navigationTitle("設定")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
-                ToolbarItem(placement: .navigationBarTrailing) {
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button("閉じる") {
                         dismiss()
                     }
@@ -251,8 +251,8 @@ struct ImageConversionPlaceholderView: View {
             }
             .navigationTitle("画像に変換")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
-                ToolbarItem(placement: .navigationBarTrailing) {
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button("閉じる") {
                         dismiss()
                     }

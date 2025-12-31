@@ -66,14 +66,14 @@ struct AddWriteLogSheet: View {
             }
             .navigationTitle("執筆記録追加")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
-                ToolbarItem(placement: .cancellationAction) {
+            .toolbar {
+                ToolbarItemGroup(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
                     }
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItemGroup(placement: .confirmationAction) {
                     Button("追加") {
                         addLog()
                     }
@@ -196,14 +196,14 @@ struct EditWriteLogSheet: View {
             }
             .navigationTitle("執筆記録編集")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
-                ToolbarItem(placement: .cancellationAction) {
+            .toolbar {
+                ToolbarItemGroup(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
                     }
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItemGroup(placement: .confirmationAction) {
                     Button("保存") {
                         updateLog()
                     }

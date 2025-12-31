@@ -24,8 +24,8 @@ struct SettingsListView: View {
             }
             .navigationTitle("設定")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
-                ToolbarItem(placement: .navigationBarLeading) {
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarLeading) {
                     Button {
                         dismiss()
                     } label: {
@@ -37,7 +37,7 @@ struct SettingsListView: View {
                     }
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button {
                         showingAddSheet = true
                     } label: {
@@ -193,14 +193,14 @@ struct AddSettingsSheet: View {
             }
             .navigationTitle("設定追加")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
-                ToolbarItem(placement: .cancellationAction) {
+            .toolbar {
+                ToolbarItemGroup(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
                     }
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItemGroup(placement: .confirmationAction) {
                     Button("追加") {
                         addSetting()
                     }
@@ -304,8 +304,8 @@ struct SettingsEditorView: View {
         }
         .navigationTitle(settings.displayTitle)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(content: {
-            ToolbarItem(placement: .navigationBarLeading) {
+        .toolbar {
+            ToolbarItemGroup(placement: .navigationBarLeading) {
                 Button {
                     dismiss()
                 } label: {
@@ -317,7 +317,7 @@ struct SettingsEditorView: View {
                 }
             }
             
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
                 Menu {
                     Button {
                         showingTitleEditSheet = true
@@ -399,14 +399,14 @@ struct EditSettingsTitleSheet: View {
             }
             .navigationTitle("設定編集")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
-                ToolbarItem(placement: .cancellationAction) {
+            .toolbar {
+                ToolbarItemGroup(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
                     }
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItemGroup(placement: .confirmationAction) {
                     Button("保存") {
                         updateSettings()
                     }

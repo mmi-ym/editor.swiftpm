@@ -49,8 +49,8 @@ struct WritingCalendarView: View {
             }
             .navigationTitle("\(novel.title) 執筆記録")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
-                ToolbarItem(placement: .navigationBarLeading) {
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarLeading) {
                     Button {
                         dismiss()
                     } label: {
@@ -62,7 +62,7 @@ struct WritingCalendarView: View {
                     }
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button {
                         showingAddSheet = true
                     } label: {

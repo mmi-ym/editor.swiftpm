@@ -20,8 +20,8 @@ struct GenreListView: View {
                 }
             }
             .navigationTitle("ジャンル一覧")
-            .toolbar(content: {
-                ToolbarItem(placement: .navigationBarLeading) {
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarLeading) {
                     Button {
                         // TODO: 執筆記録画面への遷移
                     } label: {
@@ -29,7 +29,7 @@ struct GenreListView: View {
                     }
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
                     Button {
                         showingAddSheet = true
                     } label: {
@@ -219,14 +219,14 @@ struct AddGenreSheet: View {
             }
             .navigationTitle("ジャンル追加")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
-                ToolbarItem(placement: .cancellationAction) {
+            .toolbar {
+                ToolbarItemGroup(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
                     }
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItemGroup(placement: .confirmationAction) {
                     Button("追加") {
                         addGenre()
                     }
@@ -293,14 +293,14 @@ struct EditGenreSheet: View {
             }
             .navigationTitle("ジャンル編集")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
-                ToolbarItem(placement: .cancellationAction) {
+            .toolbar {
+                ToolbarItemGroup(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
                     }
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItemGroup(placement: .confirmationAction) {
                     Button("保存") {
                         updateGenre()
                     }
