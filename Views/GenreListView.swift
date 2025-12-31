@@ -7,6 +7,7 @@ struct GenreListView: View {
     @State private var editingGenre: Genre?
     @State private var showingDeleteAlert = false
     @State private var genreToDelete: Genre?
+    @State private var showingAllWritingCalendar = false
     
     var body: some View {
         NavigationView {
@@ -23,7 +24,7 @@ struct GenreListView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
-                        // TODO: 執筆記録画面への遷移
+                        showingAllWritingCalendar = true
                     } label: {
                         Label("執筆記録", systemImage: "calendar")
                     }
@@ -48,6 +49,9 @@ struct GenreListView: View {
                         isPresented: $showingEditSheet
                     )
                 }
+            }
+            .sheet(isPresented: $showingAllWritingCalendar) {
+                AllWritingCalendarView()
             }
             .alert("ジャンルを削除", isPresented: $showingDeleteAlert) {
                 Button("キャンセル", role: .cancel) { }
