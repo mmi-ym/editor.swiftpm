@@ -21,15 +21,16 @@ struct GenreListView: View {
             }
             .navigationTitle("ジャンル一覧")
             .toolbar {
-                ToolbarItemGroup(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button {
                         // TODO: 執筆記録画面への遷移
                     } label: {
                         Label("執筆記録", systemImage: "calendar")
                     }
                 }
-                
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showingAddSheet = true
                     } label: {
@@ -220,13 +221,13 @@ struct AddGenreSheet: View {
             .navigationTitle("ジャンル追加")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItemGroup(placement: .cancellationAction) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
                     }
                 }
                 
-                ToolbarItemGroup(placement: .confirmationAction) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("追加") {
                         addGenre()
                     }
@@ -294,13 +295,13 @@ struct EditGenreSheet: View {
             .navigationTitle("ジャンル編集")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItemGroup(placement: .cancellationAction) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
                         isPresented = false
                     }
                 }
                 
-                ToolbarItemGroup(placement: .confirmationAction) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button("保存") {
                         updateGenre()
                     }
