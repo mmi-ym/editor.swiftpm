@@ -17,7 +17,6 @@ struct VerticalTextEditor: UIViewRepresentable {
         
         // 書字方向を右から左に設定（未確定文字のアンダーバーが右に表示される）
         textView.textAlignment = .right
-        textView.baseWritingDirection = .rightToLeft
         
         // フォント設定
         let font = UIFont(name: "HiraMinProN-W3", size: 20) ?? UIFont.systemFont(ofSize: 20)
