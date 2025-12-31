@@ -89,6 +89,7 @@ struct GenreListView: View {
                 } label: {
                     GenreRow(genre: genre)
                 }
+                .buttonStyle(.plain)
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(role: .destructive) {
                         genreToDelete = genre

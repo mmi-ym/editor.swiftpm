@@ -90,6 +90,7 @@ struct NovelListView: View {
                 } label: {
                     NovelRow(novel: novel)
                 }
+                .buttonStyle(.plain)
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(role: .destructive) {
                         novelToDelete = novel
