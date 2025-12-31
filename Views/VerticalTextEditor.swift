@@ -10,20 +10,16 @@ class VerticalLayoutManager: NSLayoutManager {
         // 文字の描画範囲を取得
         let rect = self.boundingRect(forGlyphRange: glyphRange, in: container)
         
-        // 縦書きの場合：文字の右端に線を引く
-        // Viewを回転させていない前提の座標計算
+        // 縦書き時の右側アンダーライン
         var underlineRect = rect
-        underlineRect.origin.x += (rect.width - 1.5) // 右側にオフセット
-        underlineRect.size.width = 1.0               // 線の太さ
+        underlineRect.origin.x += (rect.width - 2.0) // 右端へ
+        underlineRect.size.width = 1.0              // 線の太さ
         
-        // コンテナの原点を加算
-        underlineRect.origin.x += containerOrigin.x
-        underlineRect.origin.y += containerOrigin.y
-
+        // 描画（containerOriginを適用）
         if let context = UIGraphicsGetCurrentContext() {
             context.saveGState()
             context.setFillColor(UIColor.systemBlue.cgColor)
-            context.fill(underlineRect)
+            context.fill(underlineRect.offsetBy(dx: containerOrigin.x, dy: containerOrigin.y))
             context.restoreGState()
         }
     }
