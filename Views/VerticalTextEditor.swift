@@ -60,6 +60,10 @@ struct VerticalTextEditor: UIViewRepresentable {
         textView.isEditable = true
         textView.isSelectable = true
         
+        // キーボード入力を受け取るための設定
+        textView.autocorrectionType = .no
+        textView.autocapitalizationType = .none
+        
         // 縦書き設定（+90度回転 = 時計回り）
         textView.transform = CGAffineTransform(rotationAngle: .pi / 2)
         
@@ -88,6 +92,11 @@ struct VerticalTextEditor: UIViewRepresentable {
         if !text.isEmpty {
             let attributedString = NSMutableAttributedString(string: text, attributes: attributes)
             textStorage.setAttributedString(attributedString)
+        }
+        
+        // 非同期でfirst responderにする
+        DispatchQueue.main.async {
+            textView.becomeFirstResponder()
         }
         
         return textView
