@@ -73,6 +73,7 @@ struct GenreListView: View {
                 dataManager.initialize()
             }
         }
+        .navigationViewStyle(.automatic)
     }
     
     // MARK: - Genre List View

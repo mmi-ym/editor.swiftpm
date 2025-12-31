@@ -75,15 +75,6 @@ struct NovelEditorView: View {
             }
         }
         .toolbarBackground(.visible, for: .navigationBar)
-        .onAppear {
-            // iPadでサイドバーを非表示にする
-            #if targetEnvironment(macCatalyst) || os(iOS)
-            if horizontalSizeClass == .regular {
-                // Split Viewのサイドバーを隠す
-                NotificationCenter.default.post(name: NSNotification.Name("HideSidebar"), object: nil)
-            }
-            #endif
-        }
         .sheet(isPresented: $showingTitleEditSheet) {
             EditNovelTitleSheet(novel: $novel, isPresented: $showingTitleEditSheet)
         }
