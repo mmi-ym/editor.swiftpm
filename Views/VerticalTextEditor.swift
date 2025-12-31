@@ -13,8 +13,8 @@ struct VerticalTextEditor: UIViewRepresentable {
         textView.textColor = .black
         textView.textAlignment = .left
         
-        // 縦書き設定（-90度回転）
-        textView.transform = CGAffineTransform(rotationAngle: -.pi / 2)
+        // 縦書き設定（+90度回転 = 時計回り）
+        textView.transform = CGAffineTransform(rotationAngle: .pi / 2)
         textView.isScrollEnabled = true
         
         // スクロール方向を反転
