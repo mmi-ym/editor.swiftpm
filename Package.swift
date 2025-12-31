@@ -6,7 +6,7 @@ import AppleProductTypes
 let package = Package(
     name: "NovelEditor",
     platforms: [
-        .iOS("16.0")
+        .iOS("18.0")
     ],
     products: [
         .iOSApplication(
