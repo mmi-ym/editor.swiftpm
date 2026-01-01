@@ -80,7 +80,7 @@ struct NovelEditorView: View {
             SettingsListView(novel: novel)
         }
         .sheet(isPresented: $showingImageConversion) {
-            ImageConversionPlaceholderView()
+            ImageConversionSheet(isPresented: $showingImageConversion, text: bodyText)
         }
         .onChange(of: bodyText) { oldValue, newValue in
             saveNovel(newValue)
