@@ -30,6 +30,11 @@ struct VerticalTextEditor: UIViewRepresentable {
         
         textView.typingAttributes = attributes
         
+        // 未確定テキストのスタイル設定（初期設定）
+        textView.markedTextStyle = [
+            NSAttributedString.Key.backgroundColor: UIColor.systemBlue.withAlphaComponent(0.2)
+        ]
+        
         // パディング設定
         textView.textContainerInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         
@@ -37,12 +42,6 @@ struct VerticalTextEditor: UIViewRepresentable {
         if !text.isEmpty {
             let attributedString = NSAttributedString(string: text, attributes: attributes)
             textView.attributedText = attributedString
-        }
-        
-        // 未確定テキストの範囲を取得して背景色を設定
-        if let markedRange = textView.markedTextRange {
-            let style = [NSAttributedString.Key.backgroundColor: UIColor.systemBlue.withAlphaComponent(0.2)]
-            textView.markedTextStyle = style
         }
         
         return textView
