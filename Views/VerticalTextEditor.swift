@@ -39,6 +39,12 @@ struct VerticalTextEditor: UIViewRepresentable {
             textView.attributedText = attributedString
         }
         
+        // 未確定テキストの範囲を取得して背景色を設定
+        if let markedRange = textView.markedTextRange {
+            let style = [NSAttributedString.Key.backgroundColor: UIColor.systemBlue.withAlphaComponent(0.2)]
+            textView.markedTextStyle = style
+        }
+        
         return textView
     }
     
