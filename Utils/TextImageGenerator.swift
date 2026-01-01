@@ -33,14 +33,15 @@ class TextImageGenerator {
             
             // 行間設定
             let paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.lineSpacing = 20
+            paragraphStyle.lineSpacing = 10
+            paragraphStyle.alignment = .left
             
             // 縦書き属性
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
                 .foregroundColor: UIColor.black,
                 .paragraphStyle: paragraphStyle,
-                .verticalGlyphForm: true
+                .verticalGlyphForm: true  // 縦書きグリフ形式
             ]
             
             // テキストを描画（縦書き）
@@ -51,20 +52,21 @@ class TextImageGenerator {
         return image.jpegData(compressionQuality: 0.9)
     }
     
-    /// 縦書きテキストを描画
+    /// 縦書きテキストを描画（+90度回転方式）
     private static func drawVerticalText(_ text: String, in rect: CGRect, with attributes: [NSAttributedString.Key: Any], context: CGContext) {
         context.saveGState()
         
-        // 座標系を回転（縦書き用）
+        // 座標系を+90度回転（時計回り）して縦書きに
+        // 右上を起点にするため、まず右上に移動してから回転
         context.translateBy(x: rect.maxX, y: rect.minY)
-        context.rotate(by: .pi / 2)
+        context.rotate(by: .pi / 2)  // +90度（時計回り）
         
-        // 回転後の矩形
+        // 回転後の矩形（幅と高さが入れ替わる）
         let rotatedRect = CGRect(
             x: 0,
             y: 0,
-            width: rect.height,
-            height: rect.width
+            width: rect.height,  // 元の高さが新しい幅
+            height: rect.width   // 元の幅が新しい高さ
         )
         
         // テキストを描画
