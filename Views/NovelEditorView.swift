@@ -204,37 +204,6 @@ struct NovelSettingsPlaceholderView: View {
     }
 }
 
-struct ImageConversionPlaceholderView: View {
-    @Environment(\.dismiss) var dismiss
-    
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                Image(systemName: "photo.badge.arrow.down")
-                    .font(.system(size: 60))
-                    .foregroundColor(.gray)
-                
-                Text("画像変換機能")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                Text("実装予定")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            .navigationTitle("画像に変換")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("閉じる") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
-
 // MARK: - Preview
 #Preview {
     NavigationView {
