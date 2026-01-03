@@ -64,4 +64,25 @@ struct Novel: Identifiable, Codable, Hashable {
         case bodyCount = "body_count"
         case memo
     }
+    
+    // MARK: - Hashable Implementation
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(genreId)
+        hasher.combine(title)
+        hasher.combine(body)
+        hasher.combine(updatedAt.timeIntervalSince1970)
+        hasher.combine(bodyCount)
+        hasher.combine(memo)
+    }
+    
+    static func == (lhs: Novel, rhs: Novel) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.genreId == rhs.genreId &&
+        lhs.title == rhs.title &&
+        lhs.body == rhs.body &&
+        lhs.updatedAt.timeIntervalSince1970 == rhs.updatedAt.timeIntervalSince1970 &&
+        lhs.bodyCount == rhs.bodyCount &&
+        lhs.memo == rhs.memo
+    }
 }
