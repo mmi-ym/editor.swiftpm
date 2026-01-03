@@ -4,7 +4,6 @@ struct NovelListView: View {
     let genre: Genre
     @ObservedObject private var dataManager = DataManager.shared
     @State private var showingAddSheet = false
-    @State private var showingEditSheet = false
     @State private var editingNovel: Novel?
     @State private var showingDeleteAlert = false
     @State private var novelToDelete: Novel?
@@ -35,17 +34,15 @@ struct NovelListView: View {
         .sheet(isPresented: $showingAddSheet) {
             AddNovelSheet(genre: genre, isPresented: $showingAddSheet)
         }
-        .sheet(isPresented: $showingEditSheet) {
-            if let novel = editingNovel,
-               let index = dataManager.novels.firstIndex(where: { $0.id == novel.id }) {
+        .sheet(item: $editingNovel) { novel in
+            if let index = dataManager.novels.firstIndex(where: { $0.id == novel.id }) {
                 EditNovelTitleSheet(
                     novel: Binding(
                         get: { dataManager.novels[index] },
                         set: { newValue in
                             dataManager.novels[index] = newValue
                         }
-                    ),
-                    isPresented: $showingEditSheet
+                    )
                 )
             }
         }
@@ -80,7 +77,6 @@ struct NovelListView: View {
                     
                     Button {
                         editingNovel = novel
-                        showingEditSheet = true
                     } label: {
                         Label("編集", systemImage: "pencil")
                     }

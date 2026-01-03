@@ -74,7 +74,7 @@ struct NovelEditorView: View {
         }
         .toolbarBackground(.visible, for: .navigationBar)
         .sheet(isPresented: $showingTitleEditSheet) {
-            EditNovelTitleSheet(novel: $novel, isPresented: $showingTitleEditSheet)
+            EditNovelTitleSheet(novel: $novel)
         }
         .sheet(isPresented: $showingSettingsView) {
             SettingsListView(novel: novel)

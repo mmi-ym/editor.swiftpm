@@ -5,13 +5,12 @@ import SwiftUI
 struct EditNovelTitleSheet: View {
     @ObservedObject private var dataManager = DataManager.shared
     @Binding var novel: Novel
-    @Binding var isPresented: Bool
+    @Environment(\.dismiss) var dismiss
     
     @State private var title: String = ""
     
-    init(novel: Binding<Novel>, isPresented: Binding<Bool>) {
+    init(novel: Binding<Novel>) {
         self._novel = novel
-        self._isPresented = isPresented
         self._title = State(initialValue: novel.wrappedValue.title)
     }
     
@@ -44,7 +43,7 @@ struct EditNovelTitleSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
-                        isPresented = false
+                        dismiss()
                     }
                 }
                 
@@ -63,7 +62,7 @@ struct EditNovelTitleSheet: View {
         updatedNovel.title = title
         dataManager.updateNovel(updatedNovel)
         novel = updatedNovel
-        isPresented = false
+        dismiss()
     }
     
     private func formatNumber(_ number: Int) -> String {
