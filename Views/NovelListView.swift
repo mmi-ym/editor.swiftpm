@@ -36,9 +36,14 @@ struct NovelListView: View {
             AddNovelSheet(genre: genre, isPresented: $showingAddSheet)
         }
         .sheet(isPresented: $showingEditSheet) {
-            if let novel = editingNovel {
-                EditNovelSheet(
-                    novel: novel,
+            if let index = novels.firstIndex(where: { $0.id == editingNovel?.id }) {
+                EditNovelTitleSheet(
+                    novel: Binding(
+                        get: { novels[index] },
+                        set: { newValue in
+                            // DataManagerが自動的に更新するため、ここでは何もしない
+                        }
+                    ),
                     isPresented: $showingEditSheet
                 )
             }
@@ -153,10 +158,6 @@ struct NovelRow: View {
             }
             
             Spacer()
-            
-            Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.secondary)
         }
         .padding(.vertical, 8)
     }

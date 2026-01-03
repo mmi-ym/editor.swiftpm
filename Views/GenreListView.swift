@@ -72,6 +72,11 @@ struct GenreListView: View {
             .onAppear {
                 dataManager.initialize()
             }
+            
+            // iPadの初期表示用プレースホルダー
+            Text("ジャンルを選択してください")
+                .font(.title2)
+                .foregroundColor(.secondary)
         }
     }
     
