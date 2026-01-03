@@ -75,10 +75,12 @@ struct GenreListView: View {
                 dataManager.initialize()
             }
         } detail: {
-            // 詳細ビュー（初期表示用プレースホルダー）
-            Text("ジャンルを選択してください")
-                .font(.title2)
-                .foregroundColor(.secondary)
+            // ContentView側のイメージ
+            NavigationStack {
+                Text("ジャンルを選択してください")
+                    .font(.title2)
+                    .foregroundColor(.secondary)
+            }
         }
     }
     
