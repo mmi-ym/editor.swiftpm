@@ -36,12 +36,13 @@ struct NovelListView: View {
             AddNovelSheet(genre: genre, isPresented: $showingAddSheet)
         }
         .sheet(isPresented: $showingEditSheet) {
-            if let index = novels.firstIndex(where: { $0.id == editingNovel?.id }) {
+            if let novel = editingNovel,
+               let index = dataManager.novels.firstIndex(where: { $0.id == novel.id }) {
                 EditNovelTitleSheet(
                     novel: Binding(
-                        get: { novels[index] },
+                        get: { dataManager.novels[index] },
                         set: { newValue in
-                            // DataManagerが自動的に更新するため、ここでは何もしない
+                            dataManager.novels[index] = newValue
                         }
                     ),
                     isPresented: $showingEditSheet
