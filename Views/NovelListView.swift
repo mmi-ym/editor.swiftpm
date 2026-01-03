@@ -2,6 +2,7 @@ import SwiftUI
 
 struct NovelListView: View {
     let genre: Genre
+    @Binding var columnVisibility: NavigationSplitViewVisibility
     @ObservedObject private var dataManager = DataManager.shared
     @State private var showingAddSheet = false
     @State private var editingNovel: Novel?
@@ -66,6 +67,11 @@ struct NovelListView: View {
             ForEach(novels) { novel in
                 NavigationLink(destination: NovelEditorView(novel: novel)) {
                     NovelRow(novel: novel)
+                }
+                .onTapGesture {
+                    withAnimation {
+                        columnVisibility = .detailOnly
+                    }
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(role: .destructive) {
@@ -294,6 +300,9 @@ struct EditNovelSheet: View {
 
 #Preview {
     NavigationView {
-        NovelListView(genre: Genre(id: 1, name: "ファンタジー", color: "#FF6B6B"))
+        NovelListView(
+            genre: Genre(id: 1, name: "ファンタジー", color: "#FF6B6B"),
+            columnVisibility: .constant(.all)
+        )
     }
 }

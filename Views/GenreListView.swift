@@ -8,9 +8,10 @@ struct GenreListView: View {
     @State private var showingDeleteAlert = false
     @State private var genreToDelete: Genre?
     @State private var showingAllWritingCalendar = false
+    @State private var columnVisibility = NavigationSplitViewVisibility.all
     
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             // サイドバー
             ZStack {
                 if !dataManager.isInitialized {
@@ -85,7 +86,7 @@ struct GenreListView: View {
     private var genreListView: some View {
         List {
             ForEach(dataManager.genres) { genre in
-                NavigationLink(destination: NovelListView(genre: genre)) {
+                NavigationLink(destination: NovelListView(genre: genre, columnVisibility: $columnVisibility)) {
                     GenreRow(genre: genre)
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
