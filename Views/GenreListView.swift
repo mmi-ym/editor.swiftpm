@@ -10,7 +10,8 @@ struct GenreListView: View {
     @State private var showingAllWritingCalendar = false
     
     var body: some View {
-        NavigationView {
+        NavigationSplitView {
+            // サイドバー
             ZStack {
                 if !dataManager.isInitialized {
                     ProgressView("読み込み中...")
@@ -72,8 +73,8 @@ struct GenreListView: View {
             .onAppear {
                 dataManager.initialize()
             }
-            
-            // iPadの初期表示用プレースホルダー
+        } detail: {
+            // 詳細ビュー（初期表示用プレースホルダー）
             Text("ジャンルを選択してください")
                 .font(.title2)
                 .foregroundColor(.secondary)
