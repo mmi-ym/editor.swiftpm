@@ -65,13 +65,9 @@ struct NovelListView: View {
     private var novelListView: some View {
         List {
             ForEach(novels) { novel in
-                NavigationLink(destination: NovelEditorView(novel: novel)) {
+                // 💡 修正1: destination ではなく value を使う
+                NavigationLink(value: novel) {
                     NovelRow(novel: novel)
-                }
-                .onTapGesture {
-                    withAnimation {
-                        columnVisibility = .detailOnly
-                    }
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(role: .destructive) {
@@ -91,6 +87,16 @@ struct NovelListView: View {
             }
         }
         .listStyle(.insetGrouped)
+        // 💡 修正2: 遷移先とサイドバー制御をここにまとめる
+        .navigationDestination(for: Novel.self) { novel in
+            NovelEditorView(novel: novel)
+                .onAppear {
+                    withAnimation {
+                        // エディタが表示された瞬間にサイドバーを隠す
+                        columnVisibility = .detailOnly
+                    }
+                }
+        }
     }
     
     // MARK: - Empty State View
