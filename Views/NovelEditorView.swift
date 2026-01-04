@@ -106,6 +106,13 @@ struct NovelEditorView: View {
         .sheet(isPresented: $showingTimerDialog) {
             TimerSettingDialog(timer: timer, isPresented: $showingTimerDialog)
         }
+        .alert("タイマー完了", isPresented: $timer.isCompleted) {
+            Button("OK") {
+                timer.reset()
+            }
+        } message: {
+            Text("ポモドーロタイマーが完了しました！")
+        }
         .onChange(of: bodyText) { oldValue, newValue in
             saveNovel(newValue)
         }

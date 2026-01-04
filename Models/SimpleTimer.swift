@@ -7,6 +7,7 @@ class SimpleTimer: NSObject, ObservableObject {
     @Published var minutes: Int = 25
     @Published var remainingSeconds: Int = 25 * 60
     @Published var isRunning: Bool = false
+    @Published var isCompleted: Bool = false
     
     private var timer: Timer?
     
@@ -19,6 +20,7 @@ class SimpleTimer: NSObject, ObservableObject {
     func start() {
         guard !isRunning else { return }
         isRunning = true
+        isCompleted = false
         
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
@@ -36,6 +38,7 @@ class SimpleTimer: NSObject, ObservableObject {
     
     func reset() {
         pause()
+        isCompleted = false
         remainingSeconds = minutes * 60
     }
     
@@ -44,6 +47,7 @@ class SimpleTimer: NSObject, ObservableObject {
         if remainingSeconds <= 0 {
             remainingSeconds = 0
             isRunning = false
+            isCompleted = true
             timer?.invalidate()
             timer = nil
             playCompletionSound()
