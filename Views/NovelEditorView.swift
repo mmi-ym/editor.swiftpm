@@ -2,11 +2,13 @@ import SwiftUI
 
 struct NovelEditorView: View {
     @ObservedObject private var dataManager = DataManager.shared
+    @StateObject private var timer = SimpleTimer()
     @State var novel: Novel
     @State private var bodyText: String
     @State private var showingTitleEditSheet = false
     @State private var showingSettingsView = false
     @State private var showingImageConversion = false
+    @State private var showingTimerDialog = false
     @Environment(\.dismiss) var dismiss
     @Binding var columnVisibility: NavigationSplitViewVisibility
     
@@ -33,6 +35,15 @@ struct NovelEditorView: View {
                 Label("\(formatNumber(bodyText.count))文字", systemImage: "character")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                
+                if timer.isRunning {
+                    Divider()
+                        .frame(height: 16)
+                    
+                    Label(timer.getFormattedTime(), systemImage: "timer")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                }
                 
                 Spacer()
                 
@@ -68,6 +79,14 @@ struct NovelEditorView: View {
                     } label: {
                         Label("画像に変換", systemImage: "photo")
                     }
+                    
+                    Divider()
+                    
+                    Button {
+                        showingTimerDialog = true
+                    } label: {
+                        Label("タイマー", systemImage: "timer")
+                    }
                 } label: {
                     Image(systemName: "ellipsis.circle")
                         .font(.system(size: 18))
@@ -83,6 +102,9 @@ struct NovelEditorView: View {
         }
         .sheet(isPresented: $showingImageConversion) {
             ImageConversionSheet(isPresented: $showingImageConversion, text: bodyText)
+        }
+        .sheet(isPresented: $showingTimerDialog) {
+            TimerSettingDialog(timer: timer, isPresented: $showingTimerDialog)
         }
         .onChange(of: bodyText) { oldValue, newValue in
             saveNovel(newValue)
