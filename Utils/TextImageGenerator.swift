@@ -29,7 +29,7 @@ class TextImageGenerator {
             let fontSize: CGFloat = 42
 
             let font = UIFont(name: "HiraMinProN-W3", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize)
-            let attributes: [NSAttributedString.Key: Any] = [
+            let attributes= [NSAttributedString.Key: Any] = [
                 .font: font,
                 .foregroundColor: UIColor.black,
                 .paragraphStyle: paragraphStyle,
