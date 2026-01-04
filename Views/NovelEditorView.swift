@@ -8,10 +8,12 @@ struct NovelEditorView: View {
     @State private var showingSettingsView = false
     @State private var showingImageConversion = false
     @Environment(\.dismiss) var dismiss
+    @Binding var columnVisibility: NavigationSplitViewVisibility
     
-    init(novel: Novel) {
+    init(novel: Novel, columnVisibility: Binding<NavigationSplitViewVisibility>) {
         self._novel = State(initialValue: novel)
         self._bodyText = State(initialValue: novel.body)
+        self._columnVisibility = columnVisibility
     }
     
     var body: some View {
@@ -87,6 +89,9 @@ struct NovelEditorView: View {
         }
         .onDisappear {
             saveNovel(bodyText)
+            withAnimation {
+                columnVisibility = .all
+            }
         }
     }
     
@@ -134,12 +139,15 @@ struct NovelSettingsPlaceholderView: View {
 // MARK: - Preview
 #Preview {
     NavigationView {
-        NovelEditorView(novel: Novel(
-            id: 1,
-            genreId: 1,
-            title: "魔法学園の冒険",
-            body: "これは魔法学園の物語です。\n主人公は魔法の才能を持つ少年で、学園で様々な冒険を繰り広げます。",
-            bodyCount: 50
-        ))
+        NovelEditorView(
+            novel: Novel(
+                id: 1,
+                genreId: 1,
+                title: "魔法学園の冒険",
+                body: "これは魔法学園の物語です。\n主人公は魔法の才能を持つ少年で、学園で様々な冒険を繰り広げます。",
+                bodyCount: 50
+            ),
+            columnVisibility: .constant(.all)
+        )
     }
 }

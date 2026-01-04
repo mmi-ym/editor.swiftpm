@@ -89,7 +89,7 @@ struct NovelListView: View {
         .listStyle(.insetGrouped)
         // 💡 修正2: 遷移先とサイドバー制御をここにまとめる
         .navigationDestination(for: Novel.self) { novel in
-            NovelEditorView(novel: novel)
+            NovelEditorView(novel: novel, columnVisibility: $columnVisibility)
                 .onAppear {
                     withAnimation {
                         // エディタが表示された瞬間にサイドバーを隠す
