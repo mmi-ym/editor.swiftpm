@@ -1,104 +1,83 @@
 import UIKit
+import CoreText
 
-/// 文庫本風のテキスト画像生成
 class TextImageGenerator {
     
-    /// 文庫本のページサイズ（A6サイズ、300dpi）
-    /// 実際の文庫本: 105mm × 148mm
     static let pageSize = CGSize(width: 1240, height: 1748)
     
-    /// テキストを文庫本風の画像に変換
-    /// - Parameter text: 変換するテキスト
-    /// - Returns: 生成されたJPEG画像データ
-    static func generateBookPageImage(from text: String) -> Data? {
+    static func generateBookPageImage(from text: String, title: String? = nil, pageNumber: Int? = nil) -> Data? {
         let renderer = UIGraphicsImageRenderer(size: pageSize)
         
         let image = renderer.image { context in
-            // 背景色（クリーム色の紙）
+            let cgContext = context.cgContext
+            
+            // 1. 背景描画 (クリーム色)
             UIColor(red: 0.992, green: 0.984, blue: 0.969, alpha: 1.0).setFill()
             context.fill(CGRect(origin: .zero, size: pageSize))
             
-            // テキスト領域の設定
-            let cgContext = context.gcContext
-            cgContext.translateBy(x: 0, y:imageSize.height)
+            // 2. Core Text用の座標系変換 (左下原点へ)
+            cgContext.saveGState()
+            cgContext.translateBy(x: 0, y: pageSize.height)
             cgContext.scaleBy(x: 1.0, y: -1.0)
-
-            // 1. 属性津き文字列の作成
-            let paragraphStyle = NSMutableParagraphStyle()
-            // フォント設定（縦書き用）
-            let fontSize: CGFloat = 42
-
+            
+            // --- 本文の描画 ---
+            let margin: CGFloat = 140
+            let bodyRect = CGRect(
+                x: margin,
+                y: margin + 40, // 下側の余白（ページ番号用）
+                width: pageSize.width - (margin * 2),
+                height: pageSize.height - (margin * 2.5) // 上側の余白（タイトル用）
+            )
+            
+            let fontSize: CGFloat = 44
             let font = UIFont(name: "HiraMinProN-W3", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize)
-            let attributes= [NSAttributedString.Key: Any] = [
+            
+            // 行間などのスタイル設定
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.lineSpacing = 12
+            
+            let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
                 .foregroundColor: UIColor.black,
                 .paragraphStyle: paragraphStyle,
-                .verticalGlyphForm: true  // 縦書きグリフ形式
+                .verticalGlyphForm: true // 縦書き用グリフ（句読点などの位置）
             ]
+            
             let attrString = NSAttributedString(string: text, attributes: attributes)
-
-            let renderRect = CGRect(x: 100, y: 150, width: imageSize.width - 200, height: imageSize.height - 300)
-            let path = CGPath(rect: renderRect, transform: nil)
+            let framesetter = CTFramesetterCreateWithAttributedString(attrString)
+            let path = CGPath(rect: bodyRect, transform: nil)
             
-            // 行間設定
-            let paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.lineSpacing = 10
-            paragraphStyle.alignment = .left
-            
-            // 縦書き属性
+            // 縦書き（右から左へ行が進む）設定
             let frameAttributes = [
                 kCTFrameProgressionAttributeName: CTFrameProgression.rightToLeft.rawValue
             ] as CFDictionary
-            let frame = CTFramesetterCreateFrame(CTFramesetter, CFRangeMake(0, attrString.length), path, frameAttributes)
-            // テキストを描画（縦書き）
+            
+            let frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, attrString.length), path, frameAttributes)
             CTFrameDraw(frame, cgContext)
+            
+            cgContext.restoreGState() // 座標系を一旦UIKit（左上原点）に戻す
+            
+            // --- タイトル・ページ番号の描画 (UIKitの標準描画を使用) ---
+            let subFont = UIFont(name: "HiraMinProN-W3", size: 30) ?? UIFont.systemFont(ofSize: 30)
+            let subAttributes: [NSAttributedString.Key: Any] = [
+                .font: subFont,
+                .foregroundColor: UIColor.gray
+            ]
+            
+            // タイトルの描画 (ヘッダー中央)
+            if let title = title {
+                let titleSize = title.size(withAttributes: subAttributes)
+                title.draw(at: CGPoint(x: (pageSize.width - titleSize.width) / 2, y: 80), withAttributes: subAttributes)
+            }
+            
+            // ページ番号の描画 (フッター中央)
+            if let page = pageNumber {
+                let pageStr = "- \(page) -"
+                let pageSizeStr = pageStr.size(withAttributes: subAttributes)
+                pageStr.draw(at: CGPoint(x: (pageSize.width - pageSizeStr.width) / 2, y: pageSize.height - 100), withAttributes: subAttributes)
+            }
         }
         
-        // JPEGデータに変換（品質: 0.9）
         return image.jpegData(compressionQuality: 0.9)
-    }
-    
-    /// 縦書きテキストを描画（+90度回転方式）
-    private static func drawVerticalText(_ text: String, in rect: CGRect, with attributes: [NSAttributedString.Key: Any], context: CGContext) {
-        context.saveGState()
-        
-        // 座標系を+90度回転（時計回り）して縦書きに
-        // 右上を起点にするため、まず右上に移動してから回転
-        context.translateBy(x: rect.maxX, y: rect.minY)
-        context.rotate(by: .pi / 2)  // +90度（時計回り）
-        
-        // 回転後の矩形（幅と高さが入れ替わる）
-        let rotatedRect = CGRect(
-            x: 0,
-            y: 0,
-            width: rect.height,  // 元の高さが新しい幅
-            height: rect.width   // 元の幅が新しい高さ
-        )
-        
-        // テキストを描画
-        let attributedString = NSAttributedString(string: text, attributes: attributes)
-        attributedString.draw(in: rotatedRect)
-        
-        context.restoreGState()
-    }
-    
-    /// 画像をファイルに保存
-    /// - Parameters:
-    ///   - imageData: 画像データ
-    ///   - filename: ファイル名（拡張子なし）
-    /// - Returns: 保存されたファイルのURL
-    static func saveImage(_ imageData: Data, filename: String) -> URL? {
-        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-        let fileURL = documentsDirectory?.appendingPathComponent("\(filename).jpg")
-        
-        guard let url = fileURL else { return nil }
-        
-        do {
-            try imageData.write(to: url)
-            return url
-        } catch {
-            print("画像の保存に失敗しました: \(error)")
-            return nil
-        }
     }
 }
