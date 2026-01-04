@@ -9,6 +9,7 @@ struct NovelEditorView: View {
     @State private var showingSettingsView = false
     @State private var showingImageConversion = false
     @State private var showingTimerDialog = false
+    @State private var showingTimerCompletionDialog = false
     @Environment(\.dismiss) var dismiss
     @Binding var columnVisibility: NavigationSplitViewVisibility
     
@@ -106,12 +107,18 @@ struct NovelEditorView: View {
         .sheet(isPresented: $showingTimerDialog) {
             TimerSettingDialog(timer: timer, isPresented: $showingTimerDialog)
         }
-        .alert("タイマー完了", isPresented: $timer.isCompleted) {
+        .alert("タイマー完了", isPresented: $showingTimerCompletionDialog) {
             Button("OK") {
                 timer.reset()
+                showingTimerCompletionDialog = false
             }
         } message: {
             Text("ポモドーロタイマーが完了しました！")
+        }
+        .onChange(of: timer.isCompleted) { oldValue, newValue in
+            if newValue {
+                showingTimerCompletionDialog = true
+            }
         }
         .onChange(of: bodyText) { oldValue, newValue in
             saveNovel(newValue)
