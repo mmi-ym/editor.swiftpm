@@ -19,17 +19,26 @@ class TextImageGenerator {
             context.fill(CGRect(origin: .zero, size: pageSize))
             
             // テキスト領域の設定
-            let margin: CGFloat = 120  // 上下左右のマージン
-            let textRect = CGRect(
-                x: margin,
-                y: margin,
-                width: pageSize.width - (margin * 2),
-                height: pageSize.height - (margin * 2)
-            )
-            
+            let cgContext = context.gcContext
+            cgContext.translateBy(x: 0, y:imageSize.height)
+            cgContext.scaleBy(x: 1.0, y: -1.0)
+
+            // 1. 属性津き文字列の作成
+            let paragraphStyle = NSMutableParagraphStyle()
             // フォント設定（縦書き用）
             let fontSize: CGFloat = 42
+
             let font = UIFont(name: "HiraMinProN-W3", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize)
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.black,
+                .paragraphStyle: paragraphStyle,
+                .verticalGlyphForm: true  // 縦書きグリフ形式
+            ]
+            let attrString = NSAttributedString(string: text, attributes: attributes)
+
+            let renderRect = CGRect(x: 100, y: 150, width: imageSize.width - 200, height: imageSize.height - 300)
+            let path = CGPath(rect: renderRect, transform: nil)
             
             // 行間設定
             let paragraphStyle = NSMutableParagraphStyle()
@@ -37,15 +46,12 @@ class TextImageGenerator {
             paragraphStyle.alignment = .left
             
             // 縦書き属性
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: font,
-                .foregroundColor: UIColor.black,
-                .paragraphStyle: paragraphStyle,
-                .verticalGlyphForm: true  // 縦書きグリフ形式
-            ]
-            
+            let frameAttributes = [
+                kCTFrameProgressionAttributeName: CTFrameProgression.rightToLeft.rawValue
+            ] as CFDictionary
+            let frame = CTFramesetter, CFRangeMake(0, attrString.length), path, frameAttributes)
             // テキストを描画（縦書き）
-            drawVerticalText(text, in: textRect, with: attributes, context: context.cgContext)
+            CTFrameDraw(frame, cgContext)
         }
         
         // JPEGデータに変換（品質: 0.9）
