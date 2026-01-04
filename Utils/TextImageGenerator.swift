@@ -49,7 +49,7 @@ class TextImageGenerator {
             let frameAttributes = [
                 kCTFrameProgressionAttributeName: CTFrameProgression.rightToLeft.rawValue
             ] as CFDictionary
-            let frame = CTFramesetter, CFRangeMake(0, attrString.length), path, frameAttributes)
+            let frame = CTFramesetterCreateFrame(CTFramesetter, CFRangeMake(0, attrString.length), path, frameAttributes)
             // テキストを描画（縦書き）
             CTFrameDraw(frame, cgContext)
         }
