@@ -2,7 +2,7 @@ import SwiftUI
 
 struct NovelEditorView: View {
     @ObservedObject private var dataManager = DataManager.shared
-    @StateObject private var timer = SimpleTimer()
+    @StateObject private var timer = TimerManager()
     @State var novel: Novel
     @State private var bodyText: String
     @State private var showingTitleEditSheet = false
@@ -12,6 +12,8 @@ struct NovelEditorView: View {
     @State private var showingTimerCompletionDialog = false
     @Environment(\.dismiss) var dismiss
     @Binding var columnVisibility: NavigationSplitViewVisibility
+    @Environment(\.scenePhase) var scenePhase
+    @State private var lastActiveDate = Date()
     
     init(novel: Novel, columnVisibility: Binding<NavigationSplitViewVisibility>) {
         self._novel = State(initialValue: novel)
@@ -21,14 +23,17 @@ struct NovelEditorView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // 縦書きエディタ
-            ZStack {
+            ZStack(alignment: .bottomLeading) { // ここで配置を指定
                 // 和紙風背景色
                 Color(red: 0.992, green: 0.984, blue: 0.969)
                     .ignoresSafeArea()
-                
+
                 // 縦書きエディタ
-                VerticalTextEditor(text: $bodyText)
+                VerticalTextEditor(text: $bodyText).padding(.left, 5)
+
+                // 変数名を timer に修正
+                PomodoroOverlay(manager: timer)
+                    .padding(.bottom, 20) // フッターと被らないよう少し浮かせる
             }
             
             // フッター（文字数表示）
@@ -85,8 +90,15 @@ struct NovelEditorView: View {
                     
                     Button {
                         showingTimerDialog = true
+                        if timer.isRunning {
+                            timer.stop() // 動作中なら止める
+                        } else {
+                            timer.start() // 止まっていれば開始
+                        }
                     } label: {
-                        Label("タイマー", systemImage: "timer")
+                        // Label("タイマー", systemImage: "timer")
+                        Label(timer.isRunning ? "タイマーを停止" : "タイマーを開始",
+                            systemImage: timer.isRunning ? "timer.circle.fill" : "timer")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -123,11 +135,25 @@ struct NovelEditorView: View {
         .onChange(of: bodyText) { oldValue, newValue in
             saveNovel(newValue)
         }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .background {
+                lastActiveDate = Date() // バックグラウンドに行った時間を記録
+            } else if newPhase == .active {
+                if timer.isRunning {
+                    // 戻ってきた時に、経過した秒数を計算して差し引く
+                    let elapsed = Int(Date().timeIntervalSince(lastActiveDate))
+                    timer.timeRemaining = max(0, timer.timeRemaining - elapsed)
+                }
+            }
+        }
         .onDisappear {
             saveNovel(bodyText)
             withAnimation {
                 columnVisibility = .all
             }
+        }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            timer.updateTick()
         }
     }
     
