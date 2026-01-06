@@ -20,48 +20,45 @@ struct NovelEditorView: View {
         self._bodyText = State(initialValue: novel.body)
         self._columnVisibility = columnVisibility
     }
-    
+    // NovelEditorView の内部（body の上あたり）に以下を追加
+    private var editorLayer: some View {
+        ZStack(alignment: .bottomLeading) {
+
+        VerticalTextEditor(text: $bodyText)
+
+        PomodoroOverlay(manager: timer)
+            .padding(.bottom, 20)
+        }
+    }
+    private var footerLayer: some View {
+        HStack {
+            Label("\(formatNumber(bodyText.count))文字", systemImage: "character")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        
+            if timer.isRunning {
+                Divider().frame(height: 16)
+                Label(timer.getFormattedTime(), systemImage: "timer")
+                    .font(.subheadline)
+                    .foregroundColor(.blue)
+            }
+
+            Spacer()
+        
+            if bodyText.count != novel.bodyCount {
+                Text("保存中...")
+                    .font(.caption)
+                    .foregroundColor(.blue)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(Color(UIColor.secondarySystemBackground))
+    }
     var body: some View {
         VStack(spacing: 0) {
-            ZStack(alignment: .bottomLeading) { // ここで配置を指定
-                // 和紙風背景色
-                Color(red: 0.992, green: 0.984, blue: 0.969)
-                    .ignoresSafeArea()
-
-                // 縦書きエディタ
-                VerticalTextEditor(text: $bodyText).padding(.left, 5)
-
-                // 変数名を timer に修正
-                PomodoroOverlay(manager: timer)
-                    .padding(.bottom, 20) // フッターと被らないよう少し浮かせる
-            }
-            
-            // フッター（文字数表示）
-            HStack {
-                Label("\(formatNumber(bodyText.count))文字", systemImage: "character")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                
-                if timer.isRunning {
-                    Divider()
-                        .frame(height: 16)
-                    
-                    Label(timer.getFormattedTime(), systemImage: "timer")
-                        .font(.subheadline)
-                        .foregroundColor(.blue)
-                }
-                
-                Spacer()
-                
-                if bodyText.count != novel.bodyCount {
-                    Text("保存中...")
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(Color(UIColor.secondarySystemBackground))
+            editorLayer // 切り出したエディタ層
+            footerLayer // 切り出したフッター層
         }
         .navigationTitle(novel.title)
         .navigationBarTitleDisplayMode(.inline)
