@@ -89,7 +89,7 @@ struct NovelEditorView: View {
                     Divider()
                     
                     Button {
-                        showingTimerDialog = true
+                        // showingTimerDialog = true
                         if timer.isRunning {
                             timer.stop() // 動作中なら止める
                         } else {
@@ -116,9 +116,9 @@ struct NovelEditorView: View {
         .sheet(isPresented: $showingImageConversion) {
             ImageConversionSheet(isPresented: $showingImageConversion, text: bodyText)
         }
-        .sheet(isPresented: $showingTimerDialog) {
-            TimerSettingDialog(timer: timer, isPresented: $showingTimerDialog)
-        }
+        //.sheet(isPresented: $showingTimerDialog) {
+        //    TimerSettingDialog(timer: timer, isPresented: $showingTimerDialog)
+        //}
         .alert("タイマー完了", isPresented: $showingTimerCompletionDialog) {
             Button("OK") {
                 timer.reset()
