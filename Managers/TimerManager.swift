@@ -39,7 +39,21 @@ class TimerManager: ObservableObject {
         String(format: "%02d:%02d", timeRemaining / 60, timeRemaining % 60)
     }
 
+    // バックグラウンド用：通知のキャンセル
     private func cancelNotification() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+    }
+
+    // バックグラウンド用：通知の予約
+    private func scheduleNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = isWorkMode ? "集中時間終了！" : "休憩終了！"
+        content.body = isWorkMode ? "5分間の休憩に入りましょう。" : "次の25分を始めましょう。"
+        content.sound = .default // これで音が鳴ります
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(timeRemaining), repeats: false)
+        let request = UNNotificationRequest(identifier: "PomodoroTimer", content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request)
     }
 }
