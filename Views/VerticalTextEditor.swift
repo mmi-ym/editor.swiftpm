@@ -21,6 +21,7 @@ struct VerticalTextEditor: UIViewRepresentable {
         // 縦書き用の属性を設定
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .left
+        paragraphStyle.lineBreakMode = .byCharWrapping  // 文字単位の折り返し
         
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
@@ -57,6 +58,7 @@ struct VerticalTextEditor: UIViewRepresentable {
             let font = UIFont(name: "HiraMinProN-W3", size: 20) ?? UIFont.systemFont(ofSize: 20)
             let paragraphStyle = NSMutableParagraphStyle()
             paragraphStyle.alignment = .left
+            paragraphStyle.lineBreakMode = .byCharWrapping  // 文字単位の折り返し
             
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
