@@ -306,14 +306,153 @@ struct EditChapterTitleSheet: View {
     }
 }
 
-// MARK: - Chapter Editor View (Placeholder)
+// MARK: - Chapter Editor View
 struct ChapterEditorView: View {
-    let chapter: Chapter
+    @ObservedObject private var dataManager = DataManager.shared
+    @StateObject private var timer = SimpleTimer()
+    @State var chapter: Chapter
+    @State private var bodyText: String
+    @State private var showingTitleEditSheet = false
+    @State private var showingImageConversion = false
+    @State private var showingTimerDialog = false
+    @State private var showingTimerCompletionDialog = false
+    @Environment(\.dismiss) var dismiss
     @Binding var columnVisibility: NavigationSplitViewVisibility
     
+    init(chapter: Chapter, columnVisibility: Binding<NavigationSplitViewVisibility>) {
+        self._chapter = State(initialValue: chapter)
+        self._bodyText = State(initialValue: chapter.body)
+        self._columnVisibility = columnVisibility
+    }
+    
     var body: some View {
-        Text("Chapter Editor - Coming Soon")
-            .navigationTitle(chapter.title)
+        VStack(spacing: 0) {
+            // 縦書きエディタ
+            ZStack {
+                // 和紙風背景色
+                Color(red: 0.992, green: 0.984, blue: 0.969)
+                    .ignoresSafeArea()
+                
+                // 縦書きエディタ
+                VerticalTextEditor(text: $bodyText)
+            }
+            
+            // フッター（文字数表示）
+            HStack {
+                Label("\(formatNumber(bodyText.count))文字", systemImage: "character")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                if timer.isRunning {
+                    Divider()
+                        .frame(height: 16)
+                    
+                    Label(timer.getFormattedTime(), systemImage: "timer")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                }
+                
+                Spacer()
+                
+                if bodyText.count != chapter.bodyCount {
+                    Text("保存中...")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .background(Color(UIColor.secondarySystemBackground))
+        }
+        .navigationTitle(chapter.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button {
+                        showingTitleEditSheet = true
+                    } label: {
+                        Label("タイトルを変更", systemImage: "pencil")
+                    }
+                    
+                    Button {
+                        showingImageConversion = true
+                    } label: {
+                        Label("画像に変換", systemImage: "photo")
+                    }
+                    
+                    Divider()
+                    
+                    Button {
+                        showingTimerDialog = true
+                    } label: {
+                        Label("タイマー", systemImage: "timer")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .font(.system(size: 18))
+                }
+            }
+        }
+        .toolbarBackground(.visible, for: .navigationBar)
+        .sheet(isPresented: $showingTitleEditSheet) {
+            if let index = dataManager.chapters.firstIndex(where: { $0.id == chapter.id }) {
+                EditChapterTitleSheet(
+                    chapter: Binding(
+                        get: { dataManager.chapters[index] },
+                        set: { newValue in
+                            dataManager.chapters[index] = newValue
+                            chapter = newValue
+                        }
+                    )
+                )
+            }
+        }
+        .sheet(isPresented: $showingImageConversion) {
+            ImageConversionSheet(isPresented: $showingImageConversion, text: bodyText)
+        }
+        .sheet(isPresented: $showingTimerDialog) {
+            TimerSettingDialog(timer: timer, isPresented: $showingTimerDialog)
+        }
+        .alert("タイマー完了", isPresented: $showingTimerCompletionDialog) {
+            Button("OK") {
+                timer.reset()
+                showingTimerCompletionDialog = false
+            }
+        } message: {
+            Text("ポモドーロタイマーが完了しました！")
+        }
+        .onChange(of: timer.isCompleted) { oldValue, newValue in
+            if newValue {
+                showingTimerCompletionDialog = true
+            }
+        }
+        .onChange(of: bodyText) { oldValue, newValue in
+            saveChapter(newValue)
+        }
+        .onDisappear {
+            saveChapter(bodyText)
+            withAnimation {
+                columnVisibility = .all
+            }
+        }
+    }
+    
+    // MARK: - Format Number
+    private func formatNumber(_ number: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.groupingSeparator = ","
+        return formatter.string(from: NSNumber(value: number)) ?? "0"
+    }
+    
+    // MARK: - Save Chapter
+    private func saveChapter(_ text: String) {
+        var updatedChapter = chapter
+        updatedChapter.body = text
+        updatedChapter.updateBodyCount()
+        dataManager.updateChapter(updatedChapter)
+        chapter = updatedChapter
     }
 }
 

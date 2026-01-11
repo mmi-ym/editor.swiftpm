@@ -1,13 +1,22 @@
 import SwiftUI
 
 /// タイトル編集シート（共通コンポーネント）
-/// NovelEditorViewとNovelListViewの両方から使用可能
+/// NovelListViewから使用
 struct EditNovelTitleSheet: View {
     @ObservedObject private var dataManager = DataManager.shared
     @Binding var novel: Novel
     @Environment(\.dismiss) var dismiss
     
     @State private var title: String = ""
+    
+    private var chapterCount: Int {
+        dataManager.getChapters(forNovelId: novel.id).count
+    }
+    
+    private var totalCharacterCount: Int {
+        dataManager.getChapters(forNovelId: novel.id)
+            .reduce(0) { $0 + $1.bodyCount }
+    }
     
     init(novel: Binding<Novel>) {
         self._novel = novel
@@ -24,10 +33,17 @@ struct EditNovelTitleSheet: View {
                 
                 Section {
                     HStack {
-                        Text("文字数")
+                        Text("章数")
                             .foregroundColor(.secondary)
                         Spacer()
-                        Text("\(formatNumber(novel.bodyCount))文字")
+                        Text("\(chapterCount)章")
+                    }
+                    
+                    HStack {
+                        Text("合計文字数")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text("\(formatNumber(totalCharacterCount))文字")
                     }
                     
                     HStack {

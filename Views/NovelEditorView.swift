@@ -15,7 +15,7 @@ struct NovelEditorView: View {
     
     init(novel: Novel, columnVisibility: Binding<NavigationSplitViewVisibility>) {
         self._novel = State(initialValue: novel)
-        self._bodyText = State(initialValue: novel.body)
+        self._bodyText = State(initialValue: "")  // 空文字で初期化（このビューは使用されない）
         self._columnVisibility = columnVisibility
     }
     
@@ -48,11 +48,10 @@ struct NovelEditorView: View {
                 
                 Spacer()
                 
-                if bodyText.count != novel.bodyCount {
-                    Text("保存中...")
-                        .font(.caption)
-                        .foregroundColor(.blue)
-                }
+                Text("保存中...")
+                    .font(.caption)
+                    .foregroundColor(.blue)
+                    .opacity(0)  // 常に非表示（このビューは使用されない）
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -141,11 +140,8 @@ struct NovelEditorView: View {
     
     // MARK: - Save Novel
     private func saveNovel(_ text: String) {
-        var updatedNovel = novel
-        updatedNovel.body = text
-        updatedNovel.updateBodyCount()
-        dataManager.updateNovel(updatedNovel)
-        novel = updatedNovel
+        // このビューは使用されないため、何もしない
+        // Chapterの編集にはChapterEditorViewを使用
     }
 }
 
@@ -179,9 +175,7 @@ struct NovelSettingsPlaceholderView: View {
             novel: Novel(
                 id: 1,
                 genreId: 1,
-                title: "魔法学園の冒険",
-                body: "これは魔法学園の物語です。\n主人公は魔法の才能を持つ少年で、学園で様々な冒険を繰り広げます。",
-                bodyCount: 50
+                title: "魔法学園の冒険"
             ),
             columnVisibility: .constant(.all)
         )
