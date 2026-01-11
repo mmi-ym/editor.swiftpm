@@ -8,6 +8,7 @@ struct ChapterListView: View {
     @State private var editingChapter: Chapter?
     @State private var showingDeleteAlert = false
     @State private var chapterToDelete: Chapter?
+    @State private var isEditMode = false
     
     private var chapters: [Chapter] {
         dataManager.getChapters(forNovelId: novel.id)
@@ -24,6 +25,16 @@ struct ChapterListView: View {
         .navigationTitle("\(novel.title)")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                if !chapters.isEmpty {
+                    Button(isEditMode ? "完了" : "並び替え") {
+                        withAnimation {
+                            isEditMode.toggle()
+                        }
+                    }
+                }
+            }
+            
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     showingAddSheet = true
@@ -91,6 +102,7 @@ struct ChapterListView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .environment(\.editMode, .constant(isEditMode ? .active : .inactive))
         .navigationDestination(for: Chapter.self) { chapter in
             ChapterEditorView(chapter: chapter, columnVisibility: $columnVisibility)
                 .onAppear {
@@ -99,7 +111,6 @@ struct ChapterListView: View {
                     }
                 }
         }
-        .environment(\.editMode, .constant(.active))
     }
     
     // MARK: - Empty State View
@@ -146,12 +157,6 @@ struct ChapterRow: View {
     
     var body: some View {
         HStack(spacing: 15) {
-            // ドラッグハンドル
-            Image(systemName: "line.3.horizontal")
-                .font(.system(size: 20))
-                .foregroundColor(.gray)
-                .frame(width: 30)
-            
             // アイコン
             Image(systemName: "doc.text.fill")
                 .font(.system(size: 24))
