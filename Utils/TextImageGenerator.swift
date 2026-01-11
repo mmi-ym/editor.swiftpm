@@ -35,6 +35,8 @@ class TextImageGenerator {
             // 行間などのスタイル設定
             let paragraphStyle = NSMutableParagraphStyle()
             paragraphStyle.lineSpacing = 12
+            paragraphStyle.lineBreakMode = .byCharWrapping  // 文字単位の折り返し
+            paragraphStyle.hyphenationFactor = 1.0  // ハイフネーション有効化（英単語の行またぎ時に-を挿入）
             
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
