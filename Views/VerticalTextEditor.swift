@@ -35,6 +35,9 @@ struct VerticalTextEditor: UIViewRepresentable {
             NSAttributedString.Key.backgroundColor: UIColor.systemBlue.withAlphaComponent(0.2)
         ]
         
+        // 折り返しを文字単位に設定
+        textView.textContainer.lineBreakMode = .byCharWrapping
+        
         // パディング設定
         textView.textContainerInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         
