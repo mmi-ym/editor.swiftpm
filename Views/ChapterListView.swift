@@ -1,27 +1,27 @@
 import SwiftUI
 
-struct NovelListView: View {
-    let genre: Genre
+struct ChapterListView: View {
+    let novel: Novel
     @Binding var columnVisibility: NavigationSplitViewVisibility
     @ObservedObject private var dataManager = DataManager.shared
     @State private var showingAddSheet = false
-    @State private var editingNovel: Novel?
+    @State private var editingChapter: Chapter?
     @State private var showingDeleteAlert = false
-    @State private var novelToDelete: Novel?
+    @State private var chapterToDelete: Chapter?
     
-    private var novels: [Novel] {
-        dataManager.getNovels(forGenreId: genre.id)
+    private var chapters: [Chapter] {
+        dataManager.getChapters(forNovelId: novel.id)
     }
     
     var body: some View {
         ZStack {
-            if novels.isEmpty {
+            if chapters.isEmpty {
                 emptyStateView
             } else {
-                novelListView
+                chapterListView
             }
         }
-        .navigationTitle("\(genre.name) 作品一覧")
+        .navigationTitle("\(novel.title)")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -33,62 +33,73 @@ struct NovelListView: View {
             }
         }
         .sheet(isPresented: $showingAddSheet) {
-            AddNovelSheet(genre: genre, isPresented: $showingAddSheet)
+            AddChapterSheet(novel: novel, isPresented: $showingAddSheet)
         }
-        .sheet(item: $editingNovel) { novel in
-            if let index = dataManager.novels.firstIndex(where: { $0.id == novel.id }) {
-                EditNovelTitleSheet(
-                    novel: Binding(
-                        get: { dataManager.novels[index] },
+        .sheet(item: $editingChapter) { chapter in
+            if let index = dataManager.chapters.firstIndex(where: { $0.id == chapter.id }) {
+                EditChapterTitleSheet(
+                    chapter: Binding(
+                        get: { dataManager.chapters[index] },
                         set: { newValue in
-                            dataManager.novels[index] = newValue
+                            dataManager.chapters[index] = newValue
                         }
                     )
                 )
             }
         }
-        .alert("作品を削除", isPresented: $showingDeleteAlert) {
+        .alert("章を削除", isPresented: $showingDeleteAlert) {
             Button("キャンセル", role: .cancel) { }
             Button("削除", role: .destructive) {
-                if let novel = novelToDelete {
-                    deleteNovel(novel)
+                if let chapter = chapterToDelete {
+                    deleteChapter(chapter)
                 }
             }
         } message: {
-            if let novel = novelToDelete {
-                Text("「\(novel.title)」とすべての関連データを削除します。この操作は取り消せません。")
+            if let chapter = chapterToDelete {
+                Text("「\(chapter.title)」とすべての内容を削除します。この操作は取り消せません。")
             }
         }
     }
     
-    // MARK: - Novel List View
-    private var novelListView: some View {
+    // MARK: - Chapter List View
+    private var chapterListView: some View {
         List {
-            ForEach(novels) { novel in
-                NavigationLink(value: novel) {
-                    NovelRow(novel: novel)
+            ForEach(chapters) { chapter in
+                NavigationLink(value: chapter) {
+                    ChapterRow(chapter: chapter)
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(role: .destructive) {
-                        novelToDelete = novel
+                        chapterToDelete = chapter
                         showingDeleteAlert = true
                     } label: {
                         Label("削除", systemImage: "trash")
                     }
                     
                     Button {
-                        editingNovel = novel
+                        editingChapter = chapter
                     } label: {
                         Label("編集", systemImage: "pencil")
                     }
                     .tint(.blue)
                 }
             }
+            .onMove { source, destination in
+                var reorderedChapters = chapters
+                reorderedChapters.move(fromOffsets: source, toOffset: destination)
+                dataManager.reorderChapters(reorderedChapters)
+            }
         }
         .listStyle(.insetGrouped)
-        .navigationDestination(for: Novel.self) { novel in
-            ChapterListView(novel: novel, columnVisibility: $columnVisibility)
+        .navigationDestination(for: Chapter.self) { chapter in
+            ChapterEditorView(chapter: chapter, columnVisibility: $columnVisibility)
+                .onAppear {
+                    withAnimation {
+                        columnVisibility = .detailOnly
+                    }
+                }
         }
+        .environment(\.editMode, .constant(.active))
     }
     
     // MARK: - Empty State View
@@ -98,21 +109,21 @@ struct NovelListView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.gray)
             
-            Text("作品がありません")
+            Text("章がありません")
                 .font(.title2)
                 .fontWeight(.semibold)
             
-            Text("「+」ボタンから作品を追加してください")
+            Text("「+」ボタンから章を追加してください")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             
             Button {
                 showingAddSheet = true
             } label: {
-                Label("作品を追加", systemImage: "plus.circle.fill")
+                Label("章を追加", systemImage: "plus.circle.fill")
                     .font(.headline)
                     .padding()
-                    .background(genre.swiftUIColor)
+                    .background(Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
@@ -121,53 +132,44 @@ struct NovelListView: View {
         .padding()
     }
     
-    // MARK: - Delete Novel
-    private func deleteNovel(_ novel: Novel) {
+    // MARK: - Delete Chapter
+    private func deleteChapter(_ chapter: Chapter) {
         withAnimation {
-            dataManager.deleteNovel(novel)
+            dataManager.deleteChapter(chapter)
         }
     }
 }
 
-// MARK: - Novel Row
-struct NovelRow: View {
-    let novel: Novel
-    @ObservedObject private var dataManager = DataManager.shared
-    
-    private var chapterCount: Int {
-        dataManager.getChapters(forNovelId: novel.id).count
-    }
-    
-    private var totalCharacterCount: Int {
-        dataManager.getChapters(forNovelId: novel.id)
-            .reduce(0) { $0 + $1.bodyCount }
-    }
+// MARK: - Chapter Row
+struct ChapterRow: View {
+    let chapter: Chapter
     
     var body: some View {
         HStack(spacing: 15) {
+            // ドラッグハンドル
+            Image(systemName: "line.3.horizontal")
+                .font(.system(size: 20))
+                .foregroundColor(.gray)
+                .frame(width: 30)
+            
             // アイコン
-            Image(systemName: "book.fill")
+            Image(systemName: "doc.text.fill")
                 .font(.system(size: 24))
                 .foregroundColor(.blue)
                 .frame(width: 40)
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(novel.title)
+                Text(chapter.title)
                     .font(.headline)
                 
                 HStack(spacing: 12) {
-                    // 章数
-                    Label("\(chapterCount)章", systemImage: "doc.on.doc")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    // 合計文字数
-                    Label("\(formatNumber(totalCharacterCount))文字", systemImage: "character")
+                    // 文字数
+                    Label("\(formatNumber(chapter.bodyCount))文字", systemImage: "character")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
                     // 最終更新日時
-                    Label(novel.formattedUpdatedAt, systemImage: "clock")
+                    Label(chapter.formattedUpdatedAt, systemImage: "clock")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -186,10 +188,10 @@ struct NovelRow: View {
     }
 }
 
-// MARK: - Add Novel Sheet
-struct AddNovelSheet: View {
+// MARK: - Add Chapter Sheet
+struct AddChapterSheet: View {
     @ObservedObject private var dataManager = DataManager.shared
-    let genre: Genre
+    let novel: Novel
     @Binding var isPresented: Bool
     
     @State private var title: String = ""
@@ -197,25 +199,20 @@ struct AddNovelSheet: View {
     var body: some View {
         NavigationView {
             Form {
-                Section("作品タイトル") {
-                    TextField("例：魔法学園の冒険", text: $title)
+                Section("章タイトル") {
+                    TextField("例:第一章 出会い", text: $title)
                 }
                 
                 Section {
                     HStack {
-                        Text("ジャンル")
+                        Text("作品")
                             .foregroundColor(.secondary)
                         Spacer()
-                        HStack(spacing: 8) {
-                            Circle()
-                                .fill(genre.swiftUIColor)
-                                .frame(width: 20, height: 20)
-                            Text(genre.name)
-                        }
+                        Text(novel.title)
                     }
                 }
             }
-            .navigationTitle("作品追加")
+            .navigationTitle("章追加")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -226,7 +223,7 @@ struct AddNovelSheet: View {
                 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("追加") {
-                        addNovel()
+                        addChapter()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -234,77 +231,60 @@ struct AddNovelSheet: View {
         }
     }
     
-    private func addNovel() {
-        dataManager.addNovel(genreId: genre.id, title: title)
+    private func addChapter() {
+        dataManager.addChapter(novelId: novel.id, title: title)
         isPresented = false
     }
 }
 
-// MARK: - Edit Novel Sheet
-struct EditNovelSheet: View {
+// MARK: - Edit Chapter Title Sheet
+struct EditChapterTitleSheet: View {
     @ObservedObject private var dataManager = DataManager.shared
-    let novel: Novel
-    @Binding var isPresented: Bool
+    @Binding var chapter: Chapter
+    @Environment(\.dismiss) private var dismiss
     
     @State private var title: String = ""
     
-    private var chapterCount: Int {
-        dataManager.getChapters(forNovelId: novel.id).count
-    }
-    
-    private var totalCharacterCount: Int {
-        dataManager.getChapters(forNovelId: novel.id)
-            .reduce(0) { $0 + $1.bodyCount }
-    }
-    
-    init(novel: Novel, isPresented: Binding<Bool>) {
-        self.novel = novel
-        self._isPresented = isPresented
-        self._title = State(initialValue: novel.title)
+    init(chapter: Binding<Chapter>) {
+        self._chapter = chapter
+        self._title = State(initialValue: chapter.wrappedValue.title)
     }
     
     var body: some View {
         NavigationView {
             Form {
-                Section("作品タイトル") {
-                    TextField("作品タイトル", text: $title)
+                Section("章タイトル") {
+                    TextField("章タイトル", text: $title)
                 }
                 
                 Section("情報") {
                     HStack {
-                        Text("章数")
+                        Text("文字数")
                             .foregroundColor(.secondary)
                         Spacer()
-                        Text("\(chapterCount)章")
-                    }
-                    
-                    HStack {
-                        Text("合計文字数")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("\(formatNumber(totalCharacterCount))文字")
+                        Text("\(formatNumber(chapter.bodyCount))文字")
                     }
                     
                     HStack {
                         Text("最終更新")
                             .foregroundColor(.secondary)
                         Spacer()
-                        Text(novel.formattedUpdatedAt)
+                        Text(chapter.formattedUpdatedAt)
                     }
                 }
             }
-            .navigationTitle("作品編集")
+            .navigationTitle("章編集")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
-                        isPresented = false
+                        dismiss()
                     }
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("保存") {
-                        updateNovel()
+                        updateChapter()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
@@ -312,11 +292,10 @@ struct EditNovelSheet: View {
         }
     }
     
-    private func updateNovel() {
-        var updatedNovel = novel
-        updatedNovel.title = title
-        dataManager.updateNovel(updatedNovel)
-        isPresented = false
+    private func updateChapter() {
+        chapter.title = title
+        dataManager.updateChapter(chapter)
+        dismiss()
     }
     
     private func formatNumber(_ number: Int) -> String {
@@ -327,10 +306,21 @@ struct EditNovelSheet: View {
     }
 }
 
+// MARK: - Chapter Editor View (Placeholder)
+struct ChapterEditorView: View {
+    let chapter: Chapter
+    @Binding var columnVisibility: NavigationSplitViewVisibility
+    
+    var body: some View {
+        Text("Chapter Editor - Coming Soon")
+            .navigationTitle(chapter.title)
+    }
+}
+
 #Preview {
     NavigationView {
-        NovelListView(
-            genre: Genre(id: 1, name: "ファンタジー", color: "#FF6B6B"),
+        ChapterListView(
+            novel: Novel(id: 1, genreId: 1, title: "魔法学園の冒険"),
             columnVisibility: .constant(.all)
         )
     }

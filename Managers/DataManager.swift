@@ -5,6 +5,7 @@ class DataManager: ObservableObject {
     // MARK: - Published Properties
     @Published var genres: [Genre] = []
     @Published var novels: [Novel] = []
+    @Published var chapters: [Chapter] = []
     @Published var novelSettings: [NovelSettings] = []
     @Published var writeLogs: [WriteLog] = []
     @Published var thoughts: [Thought] = []
@@ -12,12 +13,14 @@ class DataManager: ObservableObject {
     // MARK: - ID管理用カウンター
     private var nextGenreId: Int = 1
     private var nextNovelId: Int = 1
+    private var nextChapterId: Int = 1
     private var nextNovelSettingsId: Int = 1
     private var nextThoughtId: Int = 1
     
     // MARK: - ファイルパス
     private let genresFileName = "genres.json"
     private let novelsFileName = "novels.json"
+    private let chaptersFileName = "chapters.json"
     private let settingsFileName = "novel_settings.json"
     private let logsFileName = "write_logs.json"
     private let thoughtsFileName = "thoughts.json"
@@ -41,6 +44,7 @@ class DataManager: ObservableObject {
         loadCounters()
         genres = load(fileName: genresFileName) ?? []
         novels = load(fileName: novelsFileName) ?? []
+        chapters = load(fileName: chaptersFileName) ?? []
         novelSettings = load(fileName: settingsFileName) ?? []
         writeLogs = load(fileName: logsFileName) ?? []
         thoughts = load(fileName: thoughtsFileName) ?? []
@@ -62,6 +66,7 @@ class DataManager: ObservableObject {
     func saveAllData() {
         save(data: genres, fileName: genresFileName)
         save(data: novels, fileName: novelsFileName)
+        save(data: chapters, fileName: chaptersFileName)
         save(data: novelSettings, fileName: settingsFileName)
         save(data: writeLogs, fileName: logsFileName)
         save(data: thoughts, fileName: thoughtsFileName)
@@ -105,6 +110,7 @@ class DataManager: ObservableObject {
     private struct IDCounters: Codable {
         var genreId: Int
         var novelId: Int
+        var chapterId: Int
         var novelSettingsId: Int
         var thoughtId: Int
     }
@@ -113,6 +119,7 @@ class DataManager: ObservableObject {
         if let counters: IDCounters = load(fileName: countersFileName) {
             nextGenreId = counters.genreId
             nextNovelId = counters.novelId
+            nextChapterId = counters.chapterId
             nextNovelSettingsId = counters.novelSettingsId
             nextThoughtId = counters.thoughtId
         }
@@ -122,6 +129,7 @@ class DataManager: ObservableObject {
         let counters = IDCounters(
             genreId: nextGenreId,
             novelId: nextNovelId,
+            chapterId: nextChapterId,
             novelSettingsId: nextNovelSettingsId,
             thoughtId: nextThoughtId
         )
@@ -144,7 +152,9 @@ class DataManager: ObservableObject {
     }
     
     func deleteGenre(_ genre: Genre) {
-        // ジャンルに紐づく作品も削除
+        // ジャンルに紐づく作品と章も削除
+        let novelIds = novels.filter { $0.genreId == genre.id }.map { $0.id }
+        chapters.removeAll { novelIds.contains($0.novelId) }
         novels.removeAll { $0.genreId == genre.id }
         genres.removeAll { $0.id == genre.id }
         saveAllData()
@@ -166,7 +176,8 @@ class DataManager: ObservableObject {
     }
     
     func deleteNovel(_ novel: Novel) {
-        // 作品に紐づく設定、ログ、思考も削除
+        // 作品に紐づく章、設定、ログ、思考も削除
+        chapters.removeAll { $0.novelId == novel.id }
         novelSettings.removeAll { $0.novelId == novel.id }
         writeLogs.removeAll { $0.novelId == novel.id }
         thoughts.removeAll { $0.novelId == novel.id }
@@ -177,6 +188,70 @@ class DataManager: ObservableObject {
     func getNovels(forGenreId genreId: Int) -> [Novel] {
         novels.filter { $0.genreId == genreId }
             .sorted { $0.updatedAt > $1.updatedAt }
+    }
+    
+    // MARK: - Chapter Operations
+    func addChapter(novelId: Int, title: String = "新規章") {
+        let maxOrder = chapters.filter { $0.novelId == novelId }.map { $0.order }.max() ?? -1
+        let chapter = Chapter(id: nextChapterId, novelId: novelId, title: title, order: maxOrder + 1)
+        nextChapterId += 1
+        chapters.append(chapter)
+        
+        // 作品の更新日時を更新
+        if let index = novels.firstIndex(where: { $0.id == novelId }) {
+            novels[index].updatedAt = Date()
+        }
+        
+        saveAllData()
+    }
+    
+    func updateChapter(_ chapter: Chapter) {
+        if let index = chapters.firstIndex(where: { $0.id == chapter.id }) {
+            chapters[index] = chapter
+            
+            // 作品の更新日時を更新
+            if let novelIndex = novels.firstIndex(where: { $0.id == chapter.novelId }) {
+                novels[novelIndex].updatedAt = Date()
+            }
+            
+            saveAllData()
+        }
+    }
+    
+    func deleteChapter(_ chapter: Chapter) {
+        chapters.removeAll { $0.id == chapter.id }
+        
+        // 削除後の章の順序を再調整
+        let remainingChapters = chapters.filter { $0.novelId == chapter.novelId }
+            .sorted { $0.order < $1.order }
+        for (index, var ch) in remainingChapters.enumerated() {
+            ch.order = index
+            if let idx = chapters.firstIndex(where: { $0.id == ch.id }) {
+                chapters[idx] = ch
+            }
+        }
+        
+        // 作品の更新日時を更新
+        if let novelIndex = novels.firstIndex(where: { $0.id == chapter.novelId }) {
+            novels[novelIndex].updatedAt = Date()
+        }
+        
+        saveAllData()
+    }
+    
+    func getChapters(forNovelId novelId: Int) -> [Chapter] {
+        chapters.filter { $0.novelId == novelId }
+            .sorted { $0.order < $1.order }
+    }
+    
+    func reorderChapters(_ chapters: [Chapter]) {
+        for (index, var chapter) in chapters.enumerated() {
+            chapter.order = index
+            if let idx = self.chapters.firstIndex(where: { $0.id == chapter.id }) {
+                self.chapters[idx] = chapter
+            }
+        }
+        saveAllData()
     }
     
     // MARK: - NovelSettings Operations
@@ -272,22 +347,29 @@ class DataManager: ObservableObject {
         // サンプル作品を追加
         if let fantasyGenre = genres.first(where: { $0.name == "ファンタジー" }) {
             addNovel(genreId: fantasyGenre.id, title: "魔法学園の冒険")
-            addNovel(genreId: fantasyGenre.id, title: "竜との契約")
-            addNovel(genreId: fantasyGenre.id, title: "失われた王国")
             
-            // 最初の作品に本文と文字数を設定
-            if var novel = novels.first {
-                novel.body = "これは魔法学園の物語です。主人公は魔法の才能を持つ少年で、学園で様々な冒険を繰り広げます。"
-                novel.updateBodyCount()
-                updateNovel(novel)
+            // 最初の作品に章を追加
+            if let novel = novels.first {
+                addChapter(novelId: novel.id, title: "第一章 入学")
+                addChapter(novelId: novel.id, title: "第二章 試練")
+                addChapter(novelId: novel.id, title: "第三章 覚醒")
+                
+                // 最初の章に本文を設定
+                if var chapter = chapters.first {
+                    chapter.body = "これは魔法学園の物語です。主人公は魔法の才能を持つ少年で、学園で様々な冒険を繰り広げます。"
+                    chapter.updateBodyCount()
+                    updateChapter(chapter)
+                }
                 
                 // 設定データを追加
                 addNovelSettings(novelId: novel.id, attribute: .character, title: "主人公 アレク")
                 addNovelSettings(novelId: novel.id, attribute: .character, title: "ヒロイン エリナ")
-                addNovelSettings(novelId: novel.id, attribute: .plot, title: "第一章 入学")
-                addNovelSettings(novelId: novel.id, attribute: .plot, title: "第二章 試練")
+                addNovelSettings(novelId: novel.id, attribute: .plot, title: "プロット概要")
                 addNovelSettings(novelId: novel.id, attribute: .other, title: "世界観設定")
             }
+            
+            addNovel(genreId: fantasyGenre.id, title: "竜との契約")
+            addNovel(genreId: fantasyGenre.id, title: "失われた王国")
         }
         
         if let sfGenre = genres.first(where: { $0.name == "SF" }) {
