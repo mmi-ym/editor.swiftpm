@@ -56,8 +56,7 @@ class TextImageGenerator {
             
             // 縦書き（右から左へ進む）を明示
             let frameAttributes = [
-                kCTFrameProgressionAttributeName: CTFrameProgression.rightToLeft.rawValue,
-                kCTFontOrientationAttributeName: CTFontOrientation.vertical.rawValue
+                kCTFrameProgressionAttributeName: CTFrameProgression.rightToLeft.rawValue
             ] as CFDictionary
             
             let frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, attrString.length), columnPath, frameAttributes)
