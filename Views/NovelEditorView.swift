@@ -101,7 +101,12 @@ struct NovelEditorView: View {
             SettingsListView(novel: novel)
         }
         .sheet(isPresented: $showingImageConversion) {
-            ImageConversionSheet(isPresented: $showingImageConversion, text: bodyText)
+            ImageConversionSheet(
+                isPresented: $showingImageConversion,
+                text: bodyText,
+                novelTitle: novel.title,
+                chapterTitle: nil
+            )
         }
         .sheet(isPresented: $showingTimerDialog) {
             TimerSettingDialog(timer: timer, isPresented: $showingTimerDialog)

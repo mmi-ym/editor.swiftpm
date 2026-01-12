@@ -5,7 +5,7 @@ class TextImageGenerator {
     
     static let pageSize = CGSize(width: 1240, height: 1748)
     
-    static func generateBookPageImage(from text: String, title: String? = nil, pageNumber: Int? = nil) -> Data? {
+    static func generateBookPageImage(from text: String, title: String? = nil, author: String? = nil, pageNumber: Int? = nil) -> Data? {
         let renderer = UIGraphicsImageRenderer(size: pageSize)
         
         let image = renderer.image { context in
@@ -70,6 +70,12 @@ class TextImageGenerator {
             if let title = title {
                 let titleSize = title.size(withAttributes: subAttributes)
                 title.draw(at: CGPoint(x: (pageSize.width - titleSize.width) / 2, y: 80), withAttributes: subAttributes)
+            }
+            
+            // 作者名の描画 (フッター左)
+            if let author = author {
+                let authorSize = author.size(withAttributes: subAttributes)
+                author.draw(at: CGPoint(x: 100, y: pageSize.height - 100), withAttributes: subAttributes)
             }
             
             // ページ番号の描画 (フッター中央)

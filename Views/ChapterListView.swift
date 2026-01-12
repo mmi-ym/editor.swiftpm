@@ -330,6 +330,10 @@ struct ChapterEditorView: View {
         self._columnVisibility = columnVisibility
     }
     
+    private var novel: Novel? {
+        dataManager.novels.first { $0.id == chapter.novelId }
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             // 縦書きエディタ
@@ -414,7 +418,12 @@ struct ChapterEditorView: View {
             }
         }
         .sheet(isPresented: $showingImageConversion) {
-            ImageConversionSheet(isPresented: $showingImageConversion, text: bodyText)
+            ImageConversionSheet(
+                isPresented: $showingImageConversion,
+                text: bodyText,
+                novelTitle: novel?.title,
+                chapterTitle: chapter.title
+            )
         }
         .sheet(isPresented: $showingTimerDialog) {
             TimerSettingDialog(timer: timer, isPresented: $showingTimerDialog)

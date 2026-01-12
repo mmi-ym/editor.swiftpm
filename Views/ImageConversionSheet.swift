@@ -4,10 +4,18 @@ import UIKit
 struct ImageConversionSheet: View {
     @Binding var isPresented: Bool
     let text: String
+    let novelTitle: String?  // 作品タイトル（オプション）
+    let chapterTitle: String?  // 章タイトル（オプション）
+    
     @State private var generatedImage: UIImage?
     @State private var isGenerating = false
     @State private var showShareSheet = false
     @State private var errorMessage: String?
+    
+    // 画像生成オプション
+    @State private var includeNovelTitle = true
+    @State private var includeChapterTitle = true
+    @State private var authorName = ""
     
     var body: some View {
         NavigationView {
@@ -70,6 +78,40 @@ struct ImageConversionSheet: View {
                             .foregroundColor(.secondary)
                             .padding(.horizontal)
                         
+                        // 設定フォーム
+                        Form {
+                            Section("ヘッダー設定") {
+                                if let novelTitle = novelTitle {
+                                    Toggle(isOn: $includeNovelTitle) {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("作品タイトルを挿入")
+                                            Text(novelTitle)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                }
+                                
+                                if let chapterTitle = chapterTitle {
+                                    Toggle(isOn: $includeChapterTitle) {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("章タイトルを挿入")
+                                            Text(chapterTitle)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            Section("作者情報") {
+                                TextField("作者名", text: $authorName)
+                                    .textContentType(.name)
+                            }
+                        }
+                        .frame(height: 250)
+                        .scrollContentBackground(.hidden)
+                        
                         Button {
                             generateImage()
                         } label: {
@@ -117,9 +159,25 @@ struct ImageConversionSheet: View {
         isGenerating = true
         errorMessage = nil
         
+        // タイトル情報を組み立て
+        let headerTitle: String? = {
+            var titles: [String] = []
+            if includeNovelTitle, let novelTitle = novelTitle {
+                titles.append(novelTitle)
+            }
+            if includeChapterTitle, let chapterTitle = chapterTitle {
+                titles.append(chapterTitle)
+            }
+            return titles.isEmpty ? nil : titles.joined(separator: " / ")
+        }()
+        
         // 非同期で画像生成
         DispatchQueue.global(qos: .userInitiated).async {
-            if let imageData = TextImageGenerator.generateBookPageImage(from: text),
+            if let imageData = TextImageGenerator.generateBookPageImage(
+                from: text,
+                title: headerTitle,
+                author: authorName.isEmpty ? nil : authorName
+            ),
                let image = UIImage(data: imageData) {
                 DispatchQueue.main.async {
                     self.generatedImage = image
