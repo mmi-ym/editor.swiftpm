@@ -45,7 +45,8 @@ class TextImageGenerator {
                 .font: font,
                 .foregroundColor: UIColor.black,
                 .paragraphStyle: paragraphStyle,
-                .verticalGlyphForm: true // 縦書き用グリフ（句読点などの位置）
+                .verticalGlyphForm: true, // 縦書き用グリフ（句読点などの位置）
+                NSAttributedString.Key(rawValue: kCTVerticalFormsAttributeName as String): 1 // Core Text用の縦書き設定
             ]
             
             let attrString = NSAttributedString(string: text, attributes: attributes)
