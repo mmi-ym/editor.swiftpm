@@ -225,8 +225,8 @@ struct ImageConversionSheet: View {
                 
                 pageNumber += 1
                 
-                // 安全のため、100ページを超えたら停止
-                if pageNumber > 100 {
+                // 安全のため、30ページを超えたら停止
+                if pageNumber > 30 {
                     break
                 }
             }
