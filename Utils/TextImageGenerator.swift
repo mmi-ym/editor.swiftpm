@@ -36,11 +36,18 @@ class TextImageGenerator {
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
                 .foregroundColor: UIColor.black,
-                .verticalGlyphForm: NSNumber(value: 1)
+                // 縦書きグリフを呼び出す
+                .verticalGlyphForm: NSNumber(value: 1),
+                NSAttributedString.Key(rawValue: kCTVerticalFormsAttributeName as String): true
             ]
             
             let attrString = NSAttributedString(string: text, attributes: attributes)
             let framesetter = CTFramesetterCreateWithAttributedString(attrString as CFAttributedString)
+            
+            // 縦書きの設定
+            let frameAttrs = [
+                kCTFrameProgressionAttributeName: CTFrameProgression.rightToLeft.rawValue
+            ] as CFDictionary
             
             // Core Text用の座標系に変換
             cgContext.saveGState()
@@ -50,8 +57,6 @@ class TextImageGenerator {
             // 縦書き用のパスを作成（widthとheightを入れ替え）
             let path = CGMutablePath()
             path.addRect(CGRect(x: 0, y: 0, width: bodyRect.height, height: bodyRect.width))
-            
-            let frameAttrs = [kCTFrameProgressionAttributeName: CTFrameProgression.rightToLeft.rawValue] as CFDictionary
             let frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, attrString.length), path, frameAttrs)
             
             // 描画位置を調整
