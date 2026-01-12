@@ -7,7 +7,7 @@ struct ImageConversionSheet: View {
     let novelTitle: String?  // 作品タイトル（オプション）
     let chapterTitle: String?  // 章タイトル（オプション）
     
-    @State private var generatedImage: UIImage?
+    @State private var generatedImages: [UIImage] = []  // 複数ページ対応
     @State private var isGenerating = false
     @State private var showShareSheet = false
     @State private var errorMessage: String?
@@ -23,16 +23,29 @@ struct ImageConversionSheet: View {
                 if isGenerating {
                     ProgressView("画像を生成中...")
                         .padding()
-                } else if let image = generatedImage {
+                } else if !generatedImages.isEmpty {
                     ScrollView {
                         VStack(spacing: 16) {
-                            // プレビュー
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxHeight: 500)
-                                .border(Color.gray.opacity(0.3), width: 1)
-                                .padding()
+                            // ページ数表示
+                            Text("\(generatedImages.count)ページ生成されました")
+                                .font(.headline)
+                                .padding(.top)
+                            
+                            // プレビュー（全ページ）
+                            ForEach(Array(generatedImages.enumerated()), id: \.offset) { index, image in
+                                VStack(spacing: 8) {
+                                    Text("ページ \(index + 1)")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxHeight: 400)
+                                        .border(Color.gray.opacity(0.3), width: 1)
+                                }
+                            }
+                            .padding(.horizontal)
                             
                             // 共有ボタン
                             Button {
@@ -46,6 +59,7 @@ struct ImageConversionSheet: View {
                                     .cornerRadius(10)
                             }
                             .padding(.horizontal)
+                            .padding(.bottom)
                         }
                     }
                 } else if let error = errorMessage {
@@ -137,8 +151,8 @@ struct ImageConversionSheet: View {
                 }
             }
             .sheet(isPresented: $showShareSheet) {
-                if let image = generatedImage {
-                    ShareSheet(items: [image])
+                if !generatedImages.isEmpty {
+                    ShareSheet(items: generatedImages)
                 }
             }
         }
@@ -158,6 +172,7 @@ struct ImageConversionSheet: View {
         
         isGenerating = true
         errorMessage = nil
+        generatedImages = []
         
         // タイトル情報を組み立て
         let headerTitle: String? = {
@@ -173,18 +188,54 @@ struct ImageConversionSheet: View {
         
         // 非同期で画像生成
         DispatchQueue.global(qos: .userInitiated).async {
-            if let imageData = TextImageGenerator.generateBookPageImage(
-                from: text,
-                title: headerTitle,
-                author: authorName.isEmpty ? nil : authorName
-            ),
-               let image = UIImage(data: imageData) {
-                DispatchQueue.main.async {
-                    self.generatedImage = image
-                    self.isGenerating = false
+            var images: [UIImage] = []
+            let author = authorName.isEmpty ? nil : authorName
+            
+            // 全体を描画文字列として管理
+            var drawingString = text
+            var pageNumber = 1
+            
+            // drawingStringが空になるまで繰り返す
+            while !drawingString.isEmpty {
+                // drawingStringの先頭から1ページ描画し、描画された文字数を取得
+                let result = TextImageGenerator.generateBookPageImageWithCharCount(
+                    from: drawingString,
+                    title: headerTitle,
+                    author: author,
+                    pageNumber: pageNumber
+                )
+                
+                // 画像が生成できた場合
+                if let imageData = result.data, let image = UIImage(data: imageData) {
+                    images.append(image)
+                    
+                    // 描画された文字数分だけdrawingStringから除去
+                    let renderedCharCount = result.charCount
+                    if renderedCharCount > 0 && renderedCharCount <= drawingString.count {
+                        let startIndex = drawingString.index(drawingString.startIndex, offsetBy: renderedCharCount)
+                        drawingString = String(drawingString[startIndex...])
+                    } else {
+                        // 描画できる文字がない、または異常値の場合は終了
+                        break
+                    }
+                } else {
+                    // 画像生成に失敗した場合は終了
+                    break
                 }
-            } else {
-                DispatchQueue.main.async {
+                
+                pageNumber += 1
+                
+                // 安全のため、100ページを超えたら停止
+                if pageNumber > 100 {
+                    break
+                }
+            }
+            
+            DispatchQueue.main.async {
+                if !images.isEmpty {
+                    self.generatedImages = images
+                    self.isGenerating = false
+                } else {
                     self.errorMessage = "画像の生成に失敗しました"
                     self.isGenerating = false
                 }

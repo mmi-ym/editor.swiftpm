@@ -5,7 +5,11 @@ class TextImageGenerator {
     
     static let pageSize = CGSize(width: 1240, height: 1748)
     
-    static func generateBookPageImage(from text: String, title: String? = nil, author: String? = nil, pageNumber: Int? = nil) -> Data? {
+    /// 画像生成と描画された文字数を返す
+    /// - Returns: (画像データ, 描画された文字数)
+    static func generateBookPageImageWithCharCount(from text: String, title: String? = nil, author: String? = nil, pageNumber: Int? = nil) -> (data: Data?, charCount: Int) {
+        var renderedCharCount = 0
+        
         let renderer = UIGraphicsImageRenderer(size: pageSize)
         
         let image = renderer.image { context in
@@ -54,6 +58,11 @@ class TextImageGenerator {
             ] as CFDictionary
             
             let frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, attrString.length), path, frameAttributes)
+            
+            // 描画された文字数を取得
+            let visibleRange = CTFrameGetVisibleStringRange(frame)
+            renderedCharCount = visibleRange.length
+            
             CTFrameDraw(frame, cgContext)
             
             cgContext.restoreGState() // 座標系を一旦UIKit（左上原点）に戻す
@@ -85,6 +94,11 @@ class TextImageGenerator {
             }
         }
         
-        return image.jpegData(compressionQuality: 0.9)
+        return (image.jpegData(compressionQuality: 0.9), renderedCharCount)
+    }
+    
+    /// 後方互換性のための関数
+    static func generateBookPageImage(from text: String, title: String? = nil, author: String? = nil, pageNumber: Int? = nil) -> Data? {
+        return generateBookPageImageWithCharCount(from: text, title: title, author: author, pageNumber: pageNumber).data
     }
 }
