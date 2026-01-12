@@ -72,13 +72,13 @@ class TextImageGenerator {
                 title.draw(at: CGPoint(x: (pageSize.width - titleSize.width) / 2, y: 80), withAttributes: subAttributes)
             }
             
-            // 作者名の描画 (フッター左)
+            // --- フッターの描画 ---
+            // 作者名の描画 (フッター左下)
             if let author = author {
-                let authorSize = author.size(withAttributes: subAttributes)
                 author.draw(at: CGPoint(x: 100, y: pageSize.height - 100), withAttributes: subAttributes)
             }
             
-            // ページ番号の描画 (フッター中央)
+            // ページ番号の描画 (フッター中央下)
             if let page = pageNumber {
                 let pageStr = "- \(page) -"
                 let pageSizeStr = pageStr.size(withAttributes: subAttributes)
