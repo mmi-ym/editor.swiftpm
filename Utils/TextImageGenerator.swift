@@ -36,9 +36,7 @@ class TextImageGenerator {
             let attributes: [NSAttributedString.Key: Any] = [
                 .font: font,
                 .foregroundColor: UIColor.black,
-                // 縦書きグリフを呼び出す
-                .verticalGlyphForm: NSNumber(value: 1),
-                NSAttributedString.Key(rawValue: kCTVerticalFormsAttributeName as String): true
+                .verticalGlyphForm: NSNumber(value: 1)
             ]
             
             let attrString = NSAttributedString(string: text, attributes: attributes)
